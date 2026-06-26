@@ -1,0 +1,36 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# Next.js
+/.next/
+/out/
+
+# Production and test artifacts
+/build
+/coverage
+/playwright-report
+/test-results
+
+# Local environment files
+.env*
+!.env.example
+
+# Logs
+*.log
+pnpm-debug.log*
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Editors and OS
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
