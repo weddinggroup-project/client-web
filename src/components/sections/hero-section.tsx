@@ -1,145 +1,133 @@
-import { getTranslations } from "next-intl/server";
-import { HiArrowRight, HiCheckCircle } from "react-icons/hi2";
+import {
+  HiArrowRight,
+  HiCheckCircle,
+  HiCube,
+  HiShoppingBag,
+  HiUsers,
+} from "react-icons/hi2";
+import type { IconType } from "react-icons";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 
-function ArchitectureVisual() {
+function DashboardPreview() {
+  const statCards: { label: string; value: string; icon: IconType }[] = [
+    { label: "Revenue", value: "$84.2k", icon: HiShoppingBag },
+    { label: "Orders", value: "1,284", icon: HiCube },
+    { label: "Customers", value: "24.8k", icon: HiUsers },
+  ];
+
   return (
-    <svg
-      viewBox="0 0 720 620"
-      role="img"
-      aria-labelledby="hero-visual-title hero-visual-description"
-      className="h-auto w-full"
-    >
-      <title id="hero-visual-title">Arsitektur modular aplikasi Next.js</title>
-      <desc id="hero-visual-description">
-        Node dan kartu yang menggambarkan routing, feature, API, dan validasi.
-      </desc>
-      <defs>
-        <linearGradient id="panel" x1="60" y1="40" x2="640" y2="590">
-          <stop stopColor="#172554" stopOpacity=".94" />
-          <stop offset="1" stopColor="#0f172a" stopOpacity=".96" />
-        </linearGradient>
-        <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
-          <stop stopColor="#22d3ee" />
-          <stop offset=".5" stopColor="#3b82f6" />
-          <stop offset="1" stopColor="#8b5cf6" />
-        </linearGradient>
-        <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-          <path d="M32 0H0V32" fill="none" stroke="#94a3b8" strokeOpacity=".08" />
-        </pattern>
-      </defs>
-      <rect x="24" y="24" width="672" height="572" rx="40" fill="url(#panel)" />
-      <rect x="24" y="24" width="672" height="572" rx="40" fill="url(#grid)" />
-      <rect
-        x="24.5"
-        y="24.5"
-        width="671"
-        height="571"
-        rx="39.5"
-        fill="none"
-        stroke="#e2e8f0"
-        strokeOpacity=".16"
-      />
-      <g fill="none" stroke="#60a5fa" strokeOpacity=".42" strokeWidth="2">
-        <path d="M360 310 192 168" />
-        <path d="M360 310 528 168" />
-        <path d="M360 310 192 452" />
-        <path d="M360 310 528 452" />
-      </g>
-      <circle cx="360" cy="310" r="72" fill="#2563eb" fillOpacity=".18" />
-      <circle cx="360" cy="310" r="52" fill="url(#accent)" />
-      <path
-        d="m337 311 15 15 32-36"
-        fill="none"
-        stroke="white"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="10"
-      />
-      <text x="360" y="390" fill="#cbd5e1" fontSize="15" textAnchor="middle">
-        production ready
-      </text>
-      {[
-        { x: 92, y: 104, label: "app/", detail: "routes & layouts", color: "#22d3ee" },
-        { x: 428, y: 104, label: "features/", detail: "business domain", color: "#60a5fa" },
-        { x: 92, y: 408, label: "lib/api", detail: "typed fetch", color: "#818cf8" },
-        { x: 428, y: 408, label: "validation", detail: "safe boundaries", color: "#c084fc" },
-      ].map((card) => (
-        <g key={card.label}>
-          <rect
-            x={card.x}
-            y={card.y}
-            width="200"
-            height="112"
-            rx="20"
-            fill="#0f172a"
-            stroke="#e2e8f0"
-            strokeOpacity=".16"
-          />
-          <circle cx={card.x + 30} cy={card.y + 32} r="7" fill={card.color} />
-          <text
-            x={card.x + 50}
-            y={card.y + 38}
-            fill="#f8fafc"
-            fontFamily="ui-monospace, monospace"
-            fontSize="18"
-            fontWeight="600"
-          >
-            {card.label}
-          </text>
-          <text x={card.x + 24} y={card.y + 78} fill="#94a3b8" fontSize="14">
-            {card.detail}
-          </text>
-        </g>
-      ))}
-    </svg>
+    <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xl shadow-blue-100/70">
+      <div className="flex items-center justify-between border-b border-neutral-200 pb-4">
+        <div>
+          <p className="text-sm font-semibold text-neutral-950">Ganipedia Admin</p>
+          <p className="mt-1 text-xs text-neutral-500">E-commerce starter workspace</p>
+        </div>
+        <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+          Live preview
+        </span>
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        {statCards.map(({ label, value, icon: Icon }) => (
+          <div key={label} className="rounded-xl border border-neutral-200 bg-neutral-50/80 p-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-neutral-500">{label}</p>
+              <Icon className="size-4 text-blue-600" aria-hidden="true" />
+            </div>
+            <p className="mt-3 text-2xl font-semibold tracking-tight text-neutral-950">
+              {value}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-[1.2fr_.8fr]">
+        <div className="rounded-xl border border-neutral-200 p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-neutral-950">Sales performance</p>
+            <span className="text-xs font-semibold text-emerald-700">+24.8%</span>
+          </div>
+          <div className="mt-5 flex h-36 items-end gap-2">
+            {[42, 58, 50, 76, 66, 92, 84, 112].map((height, index) => (
+              <span
+                key={index}
+                className="flex-1 rounded-t-lg bg-blue-600/80"
+                style={{ height }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-neutral-200 p-4">
+          <p className="text-sm font-semibold text-neutral-950">Recent orders</p>
+          <div className="mt-4 space-y-2">
+            {[
+              ["ORD-1048", "Paid", "$248"],
+              ["ORD-1047", "Packed", "$129"],
+              ["ORD-1046", "Pending", "$84"],
+            ].map(([order, status, amount]) => (
+              <div key={order} className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2">
+                <span>
+                  <span className="block text-xs font-semibold text-neutral-950">{order}</span>
+                  <span className="text-[11px] text-neutral-500">{status}</span>
+                </span>
+                <span className="text-sm font-semibold text-neutral-950">{amount}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
-export async function HeroSection() {
-  const t = await getTranslations("Hero");
-  const checks = [t("check1"), t("check2"), t("check3")];
+export function HeroSection() {
+  const checks = [
+    "Dashboard admin tersedia",
+    "Order dan CRUD product",
+    "Auth email/password",
+  ];
 
   return (
-    <section className="relative isolate overflow-hidden bg-slate-950 pb-24 pt-36 text-white sm:pt-44">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_28%,rgba(37,99,235,.18),transparent_36%),radial-gradient(circle_at_85%_70%,rgba(124,58,237,.12),transparent_30%)]" />
+    <section className="relative isolate overflow-hidden bg-[#f7f9fc] pb-24 pt-36 text-neutral-950 sm:pt-44">
+      <div className="absolute inset-x-0 top-0 h-80 bg-[linear-gradient(180deg,#eef5ff,rgba(247,249,252,0))]" />
       <Container className="relative grid items-center gap-14 lg:grid-cols-[1.02fr_.98fr]">
         <div className="max-w-3xl">
-          <Badge>
-            <span className="size-1.5 rounded-full bg-cyan-300 shadow-[0_0_12px_#67e8f9]" />
-            {t("badge")}
+          <Badge className="border-blue-200 bg-blue-50 text-blue-700">
+            <span className="size-1.5 rounded-full bg-blue-600" />
+            Ganipedia E-commerce Starter
           </Badge>
-          <h1 className="mt-7 text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-7xl">
-            {t("title")}
-            <span className="block bg-gradient-to-r from-blue-300 via-cyan-200 to-violet-300 bg-clip-text text-transparent">
-              {t("highlight")}
+          <h1 className="mt-7 text-balance text-5xl font-semibold leading-[1.02] tracking-[-0.04em] sm:text-7xl">
+            Admin commerce yang clean,
+            <span className="block text-blue-700">
+              siap dibentuk jadi toko online.
             </span>
           </h1>
-          <p className="mt-7 max-w-2xl text-pretty text-lg leading-8 text-slate-300 sm:text-xl">
-            {t("description")}
+          <p className="mt-7 max-w-2xl text-pretty text-lg leading-8 text-neutral-600 sm:text-xl">
+            Starter Next.js modern dengan auth email/password, route lokal, dummy order, CRUD product, analytics dashboard, dan layout admin yang rapi.
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <ButtonLink href="#architecture">
-              {t("structure")}
+              Lihat struktur dashboard
               <HiArrowRight className="size-4" aria-hidden="true" />
             </ButtonLink>
             <ButtonLink href="#components" variant="secondary">
-              {t("components")}
+              Lihat komponen UI
             </ButtonLink>
           </div>
-          <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-300">
+          <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-neutral-600">
             {checks.map((check) => (
               <li key={check} className="flex items-center gap-2">
-                <HiCheckCircle className="size-4 text-cyan-300" aria-hidden="true" />
+                <HiCheckCircle className="size-4 text-emerald-500" aria-hidden="true" />
                 {check}
               </li>
             ))}
           </ul>
         </div>
         <div className="mx-auto w-full max-w-2xl lg:mx-0">
-          <ArchitectureVisual />
+          <DashboardPreview />
         </div>
       </Container>
     </section>

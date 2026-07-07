@@ -13,9 +13,8 @@ menggunakan `create-next-app`.
 - TypeScript strict
 - Tailwind CSS 4
 - Server Components sebagai default
-- Better Auth dan Google OAuth
-- Cloudflare Turnstile server verification
-- Internationalization ID/EN dengan `next-intl`
+- Better Auth email/password-ready dengan dummy admin starter
+- Routing satu bahasa tanpa locale prefix
 - Typed API client dan standard API response
 - Zod validation dan normalized errors
 - Structured global logger
@@ -35,8 +34,7 @@ pnpm dev
 
 Buka:
 
-- [http://localhost:3000/id](http://localhost:3000/id)
-- [http://localhost:3000/en](http://localhost:3000/en)
+- [http://localhost:3000](http://localhost:3000)
 
 ## Perintah
 
@@ -59,8 +57,9 @@ Buka:
 ```text
 src/
 ├── app/
-│   ├── [locale]/             # Localized routes
-│   ├── api/                  # Auth, health, Turnstile
+│   ├── dashboard/            # Protected admin shell
+│   ├── sign-in/              # Dummy admin login
+│   ├── api/                  # Auth dan health
 │   └── layout.tsx
 ├── components/
 │   ├── layout/               # Site dan application shell
@@ -68,14 +67,12 @@ src/
 │   └── ui/                   # Reusable UI primitives
 ├── config/                   # Typed configuration dan constants
 ├── features/                 # Business/domain modules
-├── i18n/                     # Locale routing dan navigation
 ├── lib/
 │   ├── api/                  # API client dan response helpers
 │   ├── auth/                 # Better Auth dan session helpers
 │   ├── errors/
 │   ├── helpers/
 │   ├── logger/
-│   ├── security/             # Turnstile verification
 │   └── validation/
 ├── test/
 └── types/
@@ -130,7 +127,7 @@ Hapus halaman default create-next-app setelah homepage portfolio siap.
 Gunakan informasi publik berikut sebagai referensi:
 
 - LinkedIn: https://www.linkedin.com/in/ganiramadhan35/
-- Ganipedia: https://ganipedia.com/en
+- Ganipedia: https://ganipedia.com
 
 Jangan mengarang employment history, pendidikan, metric, testimonial, atau
 informasi personal yang tidak tersedia pada brief maupun sumber yang dapat
@@ -155,28 +152,14 @@ Project sudah dibuat menggunakan create-next-app. Jangan membuat nested project
 atau scaffold baru.
 ```
 
-## Authentication dan Turnstile
+## Authentication
 
 Isi environment berikut jika project portfolio membutuhkan sign-in:
 
 ```dotenv
 BETTER_AUTH_SECRET=
 BETTER_AUTH_URL=http://localhost:3000
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-TURNSTILE_SITE_KEY=
-TURNSTILE_SECRET_KEY=
-TURNSTILE_EXPECTED_HOSTNAME=localhost
 ```
-
-Google callback URL:
-
-```text
-http://localhost:3000/api/auth/callback/google
-```
-
-Turnstile diverifikasi di server melalui Siteverify. Secret tidak boleh memakai
-prefix `NEXT_PUBLIC_` atau menjadi Docker build argument.
 
 ## Pemeriksaan project
 

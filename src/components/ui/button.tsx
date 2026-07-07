@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 
 const variants = {
   primary:
-    "bg-white text-slate-950 shadow-[0_1px_0_rgba(255,255,255,.35)_inset] hover:bg-blue-50",
+    "bg-blue-700 text-white shadow-lg shadow-blue-700/20 hover:bg-blue-800",
   secondary:
-    "border border-white/12 bg-white/5 text-white hover:border-white/20 hover:bg-white/10",
+    "border border-neutral-200 bg-white text-neutral-800 shadow-sm shadow-neutral-200/60 hover:bg-neutral-50",
   outline:
     "border border-slate-300 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50",
   ghost: "text-slate-700 hover:bg-slate-100 hover:text-slate-950",
@@ -23,7 +23,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400 disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400 disabled:pointer-events-none disabled:opacity-50",
         variants[variant],
         className,
       )}
@@ -44,7 +44,7 @@ export function ButtonLink({
   return (
     <Link
       className={cn(
-        "inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400",
+        "inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400",
         variants[variant],
         className,
       )}

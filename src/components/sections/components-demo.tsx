@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { useLocale, useTranslations } from "next-intl";
 import type { SelectOption } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,30 +24,27 @@ const categories: SelectOption[] = [
 ];
 
 export function ComponentsDemo() {
-  const t = useTranslations("Components");
-  const locale = useLocale() as "id" | "en";
   const [category, setCategory] = useState<SelectOption | null>(null);
   const [date, setDate] = useState<Date>();
 
   return (
     <div className="grid gap-6 sm:grid-cols-2">
       <div className="space-y-2">
-        <Label htmlFor="project-category">{t("category")}</Label>
+        <Label htmlFor="project-category">Kategori product</Label>
         <LazySelect
           inputId="project-category"
           instanceId="project-category"
           options={categories}
           value={category}
-          placeholder={t("selectPlaceholder")}
+          placeholder="Pilih kategori..."
           onChange={(option) => setCategory(option as SelectOption | null)}
         />
       </div>
       <div className="space-y-2">
-        <Label>{t("date")}</Label>
+        <Label>Tanggal campaign</Label>
         <LazyDatePicker
           value={date}
-          locale={locale}
-          placeholder={t("datePlaceholder")}
+          placeholder="Pilih tanggal"
           onChange={setDate}
         />
       </div>

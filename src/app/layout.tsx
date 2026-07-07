@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { getLocale } from "next-intl/server";
 import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
@@ -16,7 +15,6 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "en_US",
     url: "/",
     siteName: siteConfig.name,
     title: siteConfig.title,
@@ -34,13 +32,11 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const locale = await getLocale();
-
   return (
-    <html lang={locale}>
+    <html lang="id">
       <body>{children}</body>
     </html>
   );
