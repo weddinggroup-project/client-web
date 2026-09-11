@@ -24,6 +24,8 @@ FROM base AS builder
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 
+RUN mkdir -p ./public
+
 ARG NEXT_PUBLIC_APP_URL=http://localhost:3303
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 
