@@ -7,7 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Edit3,
-  Package,
+  LayoutTemplate,
   Plus,
   Search,
   SlidersHorizontal,
@@ -21,131 +21,60 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Select, type SelectOption } from "@/components/ui/select";
 import { StatCard } from "@/components/ui/stat-card";
 import { Toast } from "@/components/ui/toast";
+import { formatRupiah } from "@/features/undangan-digital/wizard/wizard-data";
 
-type ProductStatus = "Active" | "Draft" | "Archived";
-type ProductModalMode = "create" | "edit";
+type TemplateStatus = "Aktif" | "Draft" | "Diarsipkan";
+type TemplateModalMode = "create" | "edit";
 
-type Product = {
+type InvitationTemplate = {
   id: string;
   name: string;
-  sku: string;
-  category: string;
+  code: string;
+  style: string;
   price: number;
-  stock: number;
-  status: ProductStatus;
+  used: number;
+  status: TemplateStatus;
   createdAt: Date;
 };
 
-type ProductForm = Omit<Product, "id">;
+type TemplateForm = Omit<InvitationTemplate, "id">;
 
-const initialProducts: Product[] = [
-  {
-    id: "PRD-1001",
-    name: "Luna Knit Sweater",
-    sku: "LKS-302",
-    category: "Fashion",
-    price: 48,
-    stock: 42,
-    status: "Active",
-    createdAt: new Date("2026-07-01"),
-  },
-  {
-    id: "PRD-1002",
-    name: "Aero Daily Backpack",
-    sku: "ADB-119",
-    category: "Accessories",
-    price: 72,
-    stock: 18,
-    status: "Active",
-    createdAt: new Date("2026-07-02"),
-  },
-  {
-    id: "PRD-1003",
-    name: "Nordic Desk Lamp",
-    sku: "NDL-882",
-    category: "Home",
-    price: 59,
-    stock: 7,
-    status: "Draft",
-    createdAt: new Date("2026-07-03"),
-  },
-  {
-    id: "PRD-1004",
-    name: "Ceramic Mug Set",
-    sku: "CMS-044",
-    category: "Home",
-    price: 34,
-    stock: 0,
-    status: "Archived",
-    createdAt: new Date("2026-07-04"),
-  },
-  {
-    id: "PRD-1005",
-    name: "Canvas Daily Sneaker",
-    sku: "CDS-772",
-    category: "Fashion",
-    price: 86,
-    stock: 26,
-    status: "Active",
-    createdAt: new Date("2026-07-05"),
-  },
-  {
-    id: "PRD-1006",
-    name: "Hydra Glow Serum",
-    sku: "HGS-611",
-    category: "Beauty",
-    price: 41,
-    stock: 15,
-    status: "Active",
-    createdAt: new Date("2026-07-06"),
-  },
-  {
-    id: "PRD-1007",
-    name: "Walnut Desk Tray",
-    sku: "WDT-508",
-    category: "Home",
-    price: 29,
-    stock: 5,
-    status: "Draft",
-    createdAt: new Date("2026-07-07"),
-  },
-  {
-    id: "PRD-1008",
-    name: "Metro Sling Bag",
-    sku: "MSB-240",
-    category: "Accessories",
-    price: 54,
-    stock: 31,
-    status: "Active",
-    createdAt: new Date("2026-07-08"),
-  },
+const initialTemplates: InvitationTemplate[] = [
+  { id: "TPL-1001", name: "Blush Elegance", code: "BLE-001", style: "Minimalis", price: 45_000, used: 42, status: "Aktif", createdAt: new Date("2026-07-01") },
+  { id: "TPL-1002", name: "Emerald Gold", code: "EGD-002", style: "Klasik", price: 65_000, used: 18, status: "Aktif", createdAt: new Date("2026-07-02") },
+  { id: "TPL-1003", name: "Rustic Botanical", code: "RBT-003", style: "Rustic", price: 55_000, used: 7, status: "Draft", createdAt: new Date("2026-07-03") },
+  { id: "TPL-1004", name: "Ivory Romance", code: "IVR-004", style: "Klasik", price: 40_000, used: 0, status: "Diarsipkan", createdAt: new Date("2026-07-04") },
+  { id: "TPL-1005", name: "Golden Hour", code: "GLH-005", style: "Modern", price: 70_000, used: 26, status: "Aktif", createdAt: new Date("2026-07-05") },
+  { id: "TPL-1006", name: "Modern Minimalist", code: "MDM-006", style: "Minimalis", price: 38_000, used: 15, status: "Aktif", createdAt: new Date("2026-07-06") },
+  { id: "TPL-1007", name: "Tropical Paradise", code: "TRP-007", style: "Modern", price: 29_000, used: 5, status: "Draft", createdAt: new Date("2026-07-07") },
+  { id: "TPL-1008", name: "Sakura Bloom", code: "SKB-008", style: "Minimalis", price: 54_000, used: 31, status: "Aktif", createdAt: new Date("2026-07-08") },
 ];
 
-const emptyForm: ProductForm = {
+const emptyForm: TemplateForm = {
   name: "",
-  sku: "",
-  category: "Fashion",
+  code: "",
+  style: "Minimalis",
   price: 0,
-  stock: 0,
-  status: "Active",
+  used: 0,
+  status: "Aktif",
   createdAt: new Date("2026-07-06"),
 };
 
-const categoryOptions: SelectOption[] = [
-  { label: "Fashion", value: "Fashion" },
-  { label: "Accessories", value: "Accessories" },
-  { label: "Home", value: "Home" },
-  { label: "Beauty", value: "Beauty" },
+const styleOptions: SelectOption[] = [
+  { label: "Minimalis", value: "Minimalis" },
+  { label: "Klasik", value: "Klasik" },
+  { label: "Rustic", value: "Rustic" },
+  { label: "Modern", value: "Modern" },
 ];
 
 const statusOptions: SelectOption[] = [
-  { label: "Active", value: "Active" },
+  { label: "Aktif", value: "Aktif" },
   { label: "Draft", value: "Draft" },
-  { label: "Archived", value: "Archived" },
+  { label: "Diarsipkan", value: "Diarsipkan" },
 ];
 
 const filterOptions: SelectOption[] = [
-  { label: "All products", value: "all" },
+  { label: "Semua template", value: "all" },
   ...statusOptions,
 ];
 
@@ -153,105 +82,105 @@ const pageSize = 5;
 
 export function ProductsDashboard() {
   const shellRef = useRef<HTMLDivElement>(null);
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [templates, setTemplates] = useState<InvitationTemplate[]>(initialTemplates);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<SelectOption>(filterOptions[0]!);
-  const [form, setForm] = useState<ProductForm>(emptyForm);
+  const [form, setForm] = useState<TemplateForm>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [modalMode, setModalMode] = useState<ProductModalMode | null>(null);
+  const [modalMode, setModalMode] = useState<TemplateModalMode | null>(null);
   const [alert, setAlert] = useState<string | null>(null);
-  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [templateToDelete, setTemplateToDelete] = useState<InvitationTemplate | null>(null);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     shellRef.current?.setAttribute("data-hydrated", "true");
   }, []);
 
-  const filteredProducts = useMemo(() => {
+  const filteredTemplates = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    return products.filter((product) => {
-      const matchesFilter = filter.value === "all" || product.status === filter.value;
+    return templates.filter((template) => {
+      const matchesFilter = filter.value === "all" || template.status === filter.value;
       const matchesSearch =
         !normalizedQuery ||
-        [product.name, product.sku, product.category]
+        [template.name, template.code, template.style]
           .join(" ")
           .toLowerCase()
           .includes(normalizedQuery);
 
       return matchesFilter && matchesSearch;
     });
-  }, [filter, products, query]);
+  }, [filter, templates, query]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
-  const visibleProducts = filteredProducts.slice((page - 1) * pageSize, page * pageSize);
-  const showingFrom = filteredProducts.length ? (page - 1) * pageSize + 1 : 0;
-  const showingTo = Math.min(page * pageSize, filteredProducts.length);
+  const totalPages = Math.max(1, Math.ceil(filteredTemplates.length / pageSize));
+  const visibleTemplates = filteredTemplates.slice((page - 1) * pageSize, page * pageSize);
+  const showingFrom = filteredTemplates.length ? (page - 1) * pageSize + 1 : 0;
+  const showingTo = Math.min(page * pageSize, filteredTemplates.length);
   const hasActiveFilters = query.trim() !== "" || filter.value !== "all";
-  const columns: DataTableColumn<Product>[] = [
+  const columns: DataTableColumn<InvitationTemplate>[] = [
     {
-      key: "product",
-      header: "Product",
-      cell: (product) => (
+      key: "template",
+      header: "Template",
+      cell: (template) => (
         <div>
-          <p className="font-semibold text-neutral-950">{product.name}</p>
-          <p className="mt-0.5 text-xs text-neutral-500">{product.sku}</p>
+          <p className="font-semibold text-neutral-950">{template.name}</p>
+          <p className="mt-0.5 text-xs text-neutral-500">{template.code}</p>
         </div>
       ),
     },
     {
-      key: "category",
-      header: "Category",
-      cell: (product) => <p className="text-neutral-600">{product.category}</p>,
+      key: "style",
+      header: "Gaya Desain",
+      cell: (template) => <p className="text-neutral-600">{template.style}</p>,
     },
     {
       key: "price",
-      header: "Price",
-      cell: (product) => (
-        <p className="font-semibold text-neutral-950">${product.price}</p>
+      header: "Harga",
+      cell: (template) => (
+        <p className="font-semibold text-neutral-950">{formatRupiah(template.price)}</p>
       ),
     },
     {
-      key: "stock",
-      header: "Stock",
-      cell: (product) => (
-        <p className={product.stock <= 8 ? "font-semibold text-amber-700" : "text-neutral-600"}>
-          {product.stock}
+      key: "used",
+      header: "Dipakai",
+      cell: (template) => (
+        <p className={template.used <= 8 ? "font-semibold text-amber-700" : "text-neutral-600"}>
+          {template.used}x
         </p>
       ),
     },
     {
       key: "date",
-      header: "Date",
-      cell: (product) => (
-        <p className="text-neutral-600">{formatProductDate(product.createdAt)}</p>
+      header: "Dibuat",
+      cell: (template) => (
+        <p className="text-neutral-600">{formatTemplateDate(template.createdAt)}</p>
       ),
     },
     {
       key: "status",
       header: "Status",
-      cell: (product) => <StatusBadge status={product.status} />,
+      cell: (template) => <StatusBadge status={template.status} />,
     },
     {
       key: "actions",
-      header: "Actions",
+      header: "Aksi",
       headerClassName: "text-right",
       className: "text-right",
-      cell: (product) => (
+      cell: (template) => (
         <div className="flex justify-end gap-2">
           <button
             type="button"
             className="grid size-9 place-items-center rounded-xl border border-neutral-200 text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-950"
-            aria-label={`Edit ${product.name}`}
-            onClick={() => openEditModal(product)}
+            aria-label={`Edit ${template.name}`}
+            onClick={() => openEditModal(template)}
           >
             <Edit3 className="size-4" aria-hidden="true" />
           </button>
           <button
             type="button"
             className="grid size-9 place-items-center rounded-xl border border-rose-100 text-rose-500 transition hover:bg-rose-50"
-            aria-label={`Delete ${product.name}`}
-            onClick={() => setProductToDelete(product)}
+            aria-label={`Delete ${template.name}`}
+            onClick={() => setTemplateToDelete(template)}
           >
             <Trash2 className="size-4" aria-hidden="true" />
           </button>
@@ -271,57 +200,57 @@ export function ProductsDashboard() {
     setModalMode("create");
   }
 
-  function openEditModal(product: Product) {
-    setEditingId(product.id);
+  function openEditModal(template: InvitationTemplate) {
+    setEditingId(template.id);
     setForm({
-      name: product.name,
-      sku: product.sku,
-      category: product.category,
-      price: product.price,
-      stock: product.stock,
-      status: product.status,
-      createdAt: product.createdAt,
+      name: template.name,
+      code: template.code,
+      style: template.style,
+      price: template.price,
+      used: template.used,
+      status: template.status,
+      createdAt: template.createdAt,
     });
     setModalMode("edit");
   }
 
-  function closeProductModal() {
+  function closeTemplateModal() {
     setModalMode(null);
     setEditingId(null);
     setForm(emptyForm);
   }
 
-  function submitProduct(event: FormEvent<HTMLFormElement>) {
+  function submitTemplate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!form.name.trim() || !form.sku.trim()) {
-      showAlert("Product name and SKU are required.");
+    if (!form.name.trim() || !form.code.trim()) {
+      showAlert("Nama template dan kode wajib diisi.");
       return;
     }
 
     if (modalMode === "edit" && editingId) {
-      setProducts((items) =>
+      setTemplates((items) =>
         items.map((item) => (item.id === editingId ? { ...item, ...form } : item)),
       );
-      showAlert("Product updated successfully.");
-      closeProductModal();
+      showAlert("Template berhasil diperbarui.");
+      closeTemplateModal();
       return;
     }
 
-    const nextId = `PRD-${getNextProductNumber(products)}`;
-    setProducts((items) => [{ id: nextId, ...form }, ...items]);
+    const nextId = `TPL-${getNextTemplateNumber(templates)}`;
+    setTemplates((items) => [{ id: nextId, ...form }, ...items]);
     setPage(1);
-    showAlert("Product added successfully.");
-    closeProductModal();
+    showAlert("Template berhasil ditambahkan.");
+    closeTemplateModal();
   }
 
   function confirmDelete() {
-    if (!productToDelete) return;
+    if (!templateToDelete) return;
 
-    setProducts((items) => items.filter((item) => item.id !== productToDelete.id));
+    setTemplates((items) => items.filter((item) => item.id !== templateToDelete.id));
     setPage(1);
-    showAlert(`${productToDelete.name} deleted.`);
-    setProductToDelete(null);
+    showAlert(`${templateToDelete.name} dihapus.`);
+    setTemplateToDelete(null);
   }
 
   function updateQuery(value: string) {
@@ -345,30 +274,30 @@ export function ProductsDashboard() {
     <div ref={shellRef} data-testid="products-shell" className="mx-auto max-w-[1320px] space-y-5">
       <Toast
         open={Boolean(alert)}
-        title="Catalog updated"
+        title="Katalog diperbarui"
         description={alert ?? ""}
-        variant={alert?.includes("required") ? "warning" : "success"}
+        variant={alert?.includes("wajib diisi") ? "warning" : "success"}
       />
 
       <div className="grid gap-4 md:grid-cols-4">
-        <StatCard title="Total products" value={String(products.length)} detail="Dummy catalog items" icon={Package} />
-        <StatCard title="Active" value={String(products.filter((item) => item.status === "Active").length)} detail="Ready to publish" icon={CheckCircle2} />
-        <StatCard title="Low stock" value={String(products.filter((item) => item.stock <= 8).length)} detail="Needs attention" icon={AlertCircle} />
-        <StatCard title="This week" value={String(products.filter((item) => item.createdAt >= new Date("2026-07-01")).length)} detail="Recently added" icon={CheckCircle2} />
+        <StatCard title="Total template" value={String(templates.length)} detail="Katalog dummy" icon={LayoutTemplate} />
+        <StatCard title="Aktif" value={String(templates.filter((item) => item.status === "Aktif").length)} detail="Siap dipakai" icon={CheckCircle2} />
+        <StatCard title="Kurang populer" value={String(templates.filter((item) => item.used <= 8).length)} detail="Perlu dipromosikan" icon={AlertCircle} />
+        <StatCard title="Minggu ini" value={String(templates.filter((item) => item.createdAt >= new Date("2026-07-01")).length)} detail="Baru ditambahkan" icon={CheckCircle2} />
       </div>
 
       <section className="rounded-xl border border-neutral-200/70 bg-white p-4 shadow-sm shadow-neutral-200/50">
         <PageHeader
-          title="Product Catalog"
-          description="Manage dummy products with modal CRUD, filters, and pagination."
+          title="Katalog Template"
+          description="Kelola template undangan dummy dengan modal CRUD, filter, dan pagination."
           action={
             <button
               type="button"
-              className="inline-flex h-10 w-fit items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 text-sm font-semibold text-white transition hover:bg-blue-800"
+              className="inline-flex h-10 w-fit items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
               onClick={openCreateModal}
             >
               <Plus className="size-4" aria-hidden="true" />
-              New product
+              Template baru
             </button>
           }
         />
@@ -377,34 +306,34 @@ export function ProductsDashboard() {
           <div className="grid gap-3 xl:grid-cols-[minmax(260px,1fr)_190px_auto] xl:items-end">
             <label className="space-y-1.5">
               <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
-                Search
+                Cari
               </span>
-              <span className="flex h-10 items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 text-neutral-500 shadow-sm shadow-neutral-200/50 transition focus-within:border-blue-300 focus-within:ring-3 focus-within:ring-blue-100">
+              <span className="flex h-10 items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 text-neutral-500 shadow-sm shadow-neutral-200/50 transition focus-within:border-primary/40 focus-within:ring-3 focus-within:ring-secondary">
                 <Search className="size-4 shrink-0" aria-hidden="true" />
                 <input
                   type="search"
                   value={query}
                   onChange={(event) => updateQuery(event.target.value)}
-                  placeholder="Name, SKU, category..."
+                  placeholder="Nama, kode, gaya desain..."
                   className="min-w-0 flex-1 bg-transparent text-sm text-neutral-900 outline-none placeholder:text-neutral-400"
                 />
               </span>
             </label>
             <div className="space-y-1.5">
               <label
-                htmlFor="product-filter"
+                htmlFor="template-filter"
                 className="text-xs font-semibold uppercase tracking-wide text-neutral-400"
               >
                 Status
               </label>
               <Select<SelectOption>
-                instanceId="product-filter"
-                inputId="product-filter"
+                instanceId="template-filter"
+                inputId="template-filter"
                 options={filterOptions}
                 value={filter}
                 isSearchable={false}
                 onChange={updateFilter}
-                classNames={productSelectClassNames}
+                classNames={templateSelectClassNames}
               />
             </div>
             {hasActiveFilters ? (
@@ -414,7 +343,7 @@ export function ProductsDashboard() {
                 onClick={clearFilters}
               >
                 <SlidersHorizontal className="size-4" aria-hidden="true" />
-                Clear filter
+                Hapus filter
               </button>
             ) : null}
           </div>
@@ -423,15 +352,15 @@ export function ProductsDashboard() {
         <div className="mt-4">
           <DataTable
             columns={columns}
-            rows={visibleProducts}
-            getRowKey={(product) => product.id}
-            emptyMessage="No products match the current filters."
+            rows={visibleTemplates}
+            getRowKey={(template) => template.id}
+            emptyMessage="Tidak ada template yang cocok dengan filter saat ini."
           />
         </div>
 
         <div className="mt-4 flex flex-col gap-3 text-sm text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            Showing {showingFrom}-{showingTo} of {filteredProducts.length} products
+            Menampilkan {showingFrom}-{showingTo} dari {filteredTemplates.length} template
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -441,7 +370,7 @@ export function ProductsDashboard() {
               onClick={() => setPage((value) => Math.max(1, value - 1))}
             >
               <ChevronLeft className="size-4" aria-hidden="true" />
-              Prev
+              Sebelumnya
             </button>
             <span className="rounded-xl bg-neutral-100 px-3 py-2 text-xs font-semibold text-neutral-700">
               {page} / {totalPages}
@@ -452,7 +381,7 @@ export function ProductsDashboard() {
               disabled={page === totalPages}
               onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
             >
-              Next
+              Berikutnya
               <ChevronRight className="size-4" aria-hidden="true" />
             </button>
           </div>
@@ -460,44 +389,44 @@ export function ProductsDashboard() {
       </section>
 
       {modalMode ? (
-        <ProductModal
+        <TemplateModal
           mode={modalMode}
           form={form}
-          onClose={closeProductModal}
-          onSubmit={submitProduct}
+          onClose={closeTemplateModal}
+          onSubmit={submitTemplate}
           onFormChange={setForm}
         />
       ) : null}
 
       <ConfirmDialog
-        open={Boolean(productToDelete)}
-        title="Delete product?"
+        open={Boolean(templateToDelete)}
+        title="Hapus template?"
         description={
           <>
-            This will remove <strong>{productToDelete?.name}</strong> from the dummy catalog.
+            Ini akan menghapus <strong>{templateToDelete?.name}</strong> dari katalog dummy.
           </>
         }
-        confirmLabel="Delete product"
+        confirmLabel="Hapus template"
         variant="danger"
-        onClose={() => setProductToDelete(null)}
+        onClose={() => setTemplateToDelete(null)}
         onConfirm={confirmDelete}
       />
     </div>
   );
 }
 
-function ProductModal({
+function TemplateModal({
   mode,
   form,
   onClose,
   onSubmit,
   onFormChange,
 }: {
-  mode: ProductModalMode;
-  form: ProductForm;
+  mode: TemplateModalMode;
+  form: TemplateForm;
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onFormChange: (form: ProductForm | ((value: ProductForm) => ProductForm)) => void;
+  onFormChange: (form: TemplateForm | ((value: TemplateForm) => TemplateForm)) => void;
 }) {
   return (
     <div
@@ -512,16 +441,16 @@ function ProductModal({
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold tracking-tight text-neutral-950">
-              {mode === "edit" ? "Edit Product" : "Add Product"}
+              {mode === "edit" ? "Edit Template" : "Tambah Template"}
             </h2>
             <p className="mt-1 text-sm text-neutral-500">
-              Product changes are saved to dummy browser state.
+              Perubahan template disimpan ke dummy browser state.
             </p>
           </div>
           <button
             type="button"
             className="grid size-9 place-items-center rounded-xl text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700"
-            aria-label="Close product modal"
+            aria-label="Close template modal"
             onClick={onClose}
           >
             <X className="size-5" aria-hidden="true" />
@@ -530,47 +459,47 @@ function ProductModal({
 
         <form className="mt-5 space-y-4" onSubmit={onSubmit}>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Product name">
+            <Field label="Nama template">
               <input
                 value={form.name}
                 onChange={(event) =>
                   onFormChange((value) => ({ ...value, name: event.target.value }))
                 }
                 className={inputClassName}
-                placeholder="Luna Knit Sweater"
+                placeholder="Blush Elegance"
               />
             </Field>
-            <Field label="SKU">
+            <Field label="Kode">
               <input
-                value={form.sku}
+                value={form.code}
                 onChange={(event) =>
-                  onFormChange((value) => ({ ...value, sku: event.target.value }))
+                  onFormChange((value) => ({ ...value, code: event.target.value }))
                 }
                 className={inputClassName}
-                placeholder="LKS-302"
+                placeholder="BLE-001"
               />
             </Field>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Category">
+            <Field label="Gaya desain">
               <Select<SelectOption>
-                instanceId="product-category"
-                inputId="product-category"
-                options={categoryOptions}
-                value={categoryOptions.find((item) => item.value === form.category)}
+                instanceId="template-style"
+                inputId="template-style"
+                options={styleOptions}
+                value={styleOptions.find((item) => item.value === form.style)}
                 isSearchable={false}
                 onChange={(option) => {
                   if (option) {
-                    onFormChange((value) => ({ ...value, category: option.value }));
+                    onFormChange((value) => ({ ...value, style: option.value }));
                   }
                 }}
-                classNames={productSelectClassNames}
+                classNames={templateSelectClassNames}
               />
             </Field>
             <Field label="Status">
               <Select<SelectOption>
-                instanceId="product-status"
-                inputId="product-status"
+                instanceId="template-status"
+                inputId="template-status"
                 options={statusOptions}
                 value={statusOptions.find((item) => item.value === form.status)}
                 isSearchable={false}
@@ -578,16 +507,16 @@ function ProductModal({
                   if (option) {
                     onFormChange((value) => ({
                       ...value,
-                      status: option.value as ProductStatus,
+                      status: option.value as TemplateStatus,
                     }));
                   }
                 }}
-                classNames={productSelectClassNames}
+                classNames={templateSelectClassNames}
               />
             </Field>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
-            <Field label="Price">
+            <Field label="Harga">
               <input
                 type="number"
                 min="0"
@@ -598,18 +527,18 @@ function ProductModal({
                 className={inputClassName}
               />
             </Field>
-            <Field label="Stock">
+            <Field label="Dipakai">
               <input
                 type="number"
                 min="0"
-                value={form.stock}
+                value={form.used}
                 onChange={(event) =>
-                  onFormChange((value) => ({ ...value, stock: Number(event.target.value) }))
+                  onFormChange((value) => ({ ...value, used: Number(event.target.value) }))
                 }
                 className={inputClassName}
               />
             </Field>
-            <Field label="Created date">
+            <Field label="Tanggal dibuat">
               <DatePicker
                 value={form.createdAt}
                 onChange={(date) => {
@@ -617,7 +546,7 @@ function ProductModal({
                     onFormChange((value) => ({ ...value, createdAt: date }));
                   }
                 }}
-                placeholder="Created date"
+                placeholder="Tanggal dibuat"
               />
             </Field>
           </div>
@@ -628,14 +557,14 @@ function ProductModal({
               className="h-10 rounded-xl border border-neutral-200 px-4 text-sm font-semibold text-neutral-600 transition hover:bg-neutral-50"
               onClick={onClose}
             >
-              Cancel
+              Batal
             </button>
             <button
               type="submit"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 text-sm font-semibold text-white transition hover:bg-blue-800"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
             >
               <Plus className="size-4" aria-hidden="true" />
-              {mode === "edit" ? "Update product" : "Add product"}
+              {mode === "edit" ? "Perbarui template" : "Tambah template"}
             </button>
           </div>
         </form>
@@ -653,11 +582,11 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function StatusBadge({ status }: { status: ProductStatus }) {
-  const styles: Record<ProductStatus, string> = {
-    Active: "bg-emerald-50 text-emerald-700",
+function StatusBadge({ status }: { status: TemplateStatus }) {
+  const styles: Record<TemplateStatus, string> = {
+    Aktif: "bg-emerald-50 text-emerald-700",
     Draft: "bg-amber-50 text-amber-700",
-    Archived: "bg-neutral-100 text-neutral-600",
+    Diarsipkan: "bg-neutral-100 text-neutral-600",
   };
 
   return (
@@ -667,17 +596,17 @@ function StatusBadge({ status }: { status: ProductStatus }) {
   );
 }
 
-function getNextProductNumber(products: Product[]) {
-  const maxNumber = products.reduce((max, product) => {
-    const value = Number(product.id.replace("PRD-", ""));
+function getNextTemplateNumber(templates: InvitationTemplate[]) {
+  const maxNumber = templates.reduce((max, template) => {
+    const value = Number(template.id.replace("TPL-", ""));
     return Number.isFinite(value) ? Math.max(max, value) : max;
   }, 1000);
 
   return maxNumber + 1;
 }
 
-function formatProductDate(date: Date) {
-  return new Intl.DateTimeFormat("en", {
+function formatTemplateDate(date: Date) {
+  return new Intl.DateTimeFormat("id", {
     month: "short",
     day: "2-digit",
     year: "numeric",
@@ -685,13 +614,13 @@ function formatProductDate(date: Date) {
 }
 
 const inputClassName =
-  "h-10 w-full rounded-xl border border-neutral-200 px-3 text-sm outline-none transition focus:border-blue-300 focus:ring-3 focus:ring-blue-100";
+  "h-10 w-full rounded-xl border border-neutral-200 px-3 text-sm outline-none transition focus:border-primary/40 focus:ring-3 focus:ring-secondary";
 
-const productSelectClassNames = {
+const templateSelectClassNames = {
   control: ({ isFocused }: { isFocused: boolean }) =>
     `min-h-10 rounded-xl border bg-white text-sm transition ${
       isFocused
-        ? "border-blue-300 ring-3 ring-blue-100"
+        ? "border-primary/40 ring-3 ring-secondary"
         : "border-neutral-200"
     }`,
   valueContainer: () => "gap-1 px-3",
@@ -705,7 +634,7 @@ const productSelectClassNames = {
   option: ({ isFocused, isSelected }: { isFocused: boolean; isSelected: boolean }) =>
     `cursor-pointer rounded-xl px-3 py-2 text-sm ${
       isSelected
-        ? "bg-blue-50 text-blue-700"
+        ? "bg-secondary text-primary"
         : isFocused
           ? "bg-neutral-100 text-neutral-950"
           : "text-neutral-600"

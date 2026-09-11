@@ -1,13 +1,14 @@
 import type { MetadataRoute } from "next";
+import { siteConfig } from "@/lib/site";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Ganipedia Next.js Starter",
-    short_name: "Ganipedia",
-    description: "Starter Next.js modern dari Ganipedia.",
+    name: siteConfig.title,
+    short_name: siteConfig.name,
+    description: siteConfig.description,
     start_url: "/",
     display: "standalone",
-    background_color: "#070a12",
-    theme_color: "#070a12",
+    background_color: "#ffffff",
+    theme_color: "#6b3f45",
   };
 }

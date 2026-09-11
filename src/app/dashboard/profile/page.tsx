@@ -11,10 +11,10 @@ import { requireSession } from "@/lib/auth/session";
 import { ProfileActions } from "@/features/profile/components/profile-actions";
 
 const accessMatrix = [
-  { area: "Products", permission: "Create, edit, archive", level: "Owner" },
-  { area: "Orders", permission: "Refund, fulfill, export", level: "Admin" },
-  { area: "Customers", permission: "View profile and tags", level: "Admin" },
-  { area: "Settings", permission: "Billing, roles, security", level: "Owner" },
+  { area: "Template", permission: "Buat, edit, arsipkan", level: "Owner" },
+  { area: "Pesanan", permission: "Refund, proses, ekspor", level: "Admin" },
+  { area: "Pasangan", permission: "Lihat profil dan tag", level: "Admin" },
+  { area: "Pengaturan", permission: "Billing, role, keamanan", level: "Owner" },
 ];
 
 export default async function ProfilePage() {
@@ -31,7 +31,7 @@ export default async function ProfilePage() {
       <section className="rounded-xl border border-neutral-200/70 bg-white p-6 shadow-sm shadow-neutral-200/50">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex items-start gap-4">
-            <div className="grid size-16 shrink-0 place-items-center rounded-xl bg-blue-700 text-lg font-semibold text-white shadow-lg shadow-blue-700/20">
+            <div className="grid size-16 shrink-0 place-items-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-lg shadow-primary/20">
               {initials}
             </div>
             <div>
@@ -41,11 +41,11 @@ export default async function ProfilePage() {
                 </h2>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
                   <BadgeCheck className="size-3.5" aria-hidden="true" />
-                  Verified admin
+                  Admin terverifikasi
                 </span>
               </div>
               <p className="mt-1 text-sm text-neutral-500">
-                Primary administrator for Ganipedia online store operations.
+                Admin utama untuk operasional platform Vowly.
               </p>
               <div className="mt-4 flex flex-wrap gap-2 text-sm text-neutral-600">
                 <InfoPill icon={Mail} label={session.user.email} />
@@ -63,21 +63,21 @@ export default async function ProfilePage() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold tracking-tight text-neutral-950">
-                Role & Permissions
+                Peran & Akses
               </h3>
               <p className="mt-1 text-sm text-neutral-500">
-                Starter permission map for the admin account.
+                Peta akses starter untuk akun admin.
               </p>
             </div>
-            <span className="grid size-10 place-items-center rounded-xl bg-blue-50 text-blue-600">
+            <span className="grid size-10 place-items-center rounded-xl bg-secondary text-primary">
               <ShieldCheck className="size-5" aria-hidden="true" />
             </span>
           </div>
 
           <div className="mt-5 overflow-hidden rounded-xl border border-neutral-200">
             <div className="hidden grid-cols-[.8fr_1.2fr_.6fr] gap-4 bg-neutral-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-neutral-400 md:grid">
-              <span>Module</span>
-              <span>Permission</span>
+              <span>Modul</span>
+              <span>Akses</span>
               <span>Level</span>
             </div>
             <div className="divide-y divide-neutral-200">
@@ -88,7 +88,7 @@ export default async function ProfilePage() {
                 >
                   <span className="font-semibold text-neutral-950">{item.area}</span>
                   <span className="text-neutral-600">{item.permission}</span>
-                  <span className="w-fit rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                  <span className="w-fit rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-primary">
                     {item.level}
                   </span>
                 </div>
@@ -100,20 +100,20 @@ export default async function ProfilePage() {
         <section className="rounded-xl border border-neutral-200/70 bg-white p-6 shadow-sm shadow-neutral-200/50">
           <div>
             <h3 className="text-lg font-semibold tracking-tight text-neutral-950">
-              Account Security
+              Keamanan Akun
             </h3>
             <p className="mt-1 text-sm text-neutral-500">
-              Dummy settings prepared for production flows.
+              Pengaturan dummy yang disiapkan untuk alur produksi.
             </p>
           </div>
           <div className="mt-5 space-y-3">
             {[
-              { title: "Password", detail: "Last changed 14 days ago", icon: KeyRound },
-              { title: "Session", detail: "Bypass enabled for template preview", icon: MonitorCog },
-              { title: "Two-step login", detail: "Ready to connect to provider", icon: ShieldCheck },
+              { title: "Password", detail: "Terakhir diubah 14 hari lalu", icon: KeyRound },
+              { title: "Sesi", detail: "Bypass aktif untuk preview template", icon: MonitorCog },
+              { title: "Login dua langkah", detail: "Siap terhubung ke provider", icon: ShieldCheck },
             ].map(({ title, detail, icon: Icon }) => (
               <div key={title} className="flex gap-3 rounded-xl border border-neutral-100 bg-neutral-50/70 p-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-white text-blue-700">
+                <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-white text-primary">
                   <Icon className="size-4" aria-hidden="true" />
                 </span>
                 <div>

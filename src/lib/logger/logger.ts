@@ -56,4 +56,4 @@ export function createLogger(defaultContext: LogContext = {}) {
   };
 }
 
-export const logger = createLogger({ service: "ganipedia-nextjs-starter" });
+export const logger = createLogger({ service: "vowly-client" });

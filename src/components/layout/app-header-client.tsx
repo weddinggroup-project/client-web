@@ -25,21 +25,21 @@ type AppHeaderClientProps = {
 
 const notifications = [
   {
-    title: "Low stock alert",
-    description: "Walnut Desk Tray has 5 units left",
-    time: "2m ago",
+    title: "Undangan baru menunggu",
+    description: "VOW-1050 belum dikonfirmasi tamu",
+    time: "2m lalu",
     icon: PackageCheck,
   },
   {
-    title: "Pending payout",
-    description: "$8,420 scheduled for review",
-    time: "18m ago",
+    title: "Pembayaran tertunda",
+    description: "Rp8.420.000 menunggu verifikasi",
+    time: "18m lalu",
     icon: Clock3,
   },
   {
-    title: "Order #ORD-1048 paid",
-    description: "Ready for fulfillment",
-    time: "1h ago",
+    title: "Pesanan VOW-1048 lunas",
+    description: "Siap diproses tim desain",
+    time: "1j lalu",
     icon: CheckCircle2,
   },
 ];
@@ -96,18 +96,18 @@ export function AppHeaderClient({ user }: AppHeaderClientProps) {
       </div>
 
       <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-        <label className="hidden h-10 w-[230px] items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 text-neutral-500 shadow-sm shadow-neutral-200/70 transition focus-within:border-blue-300 focus-within:ring-3 focus-within:ring-blue-100 md:flex">
+        <label className="hidden h-10 w-[230px] items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 text-neutral-500 shadow-sm shadow-neutral-200/70 transition focus-within:border-primary/40 focus-within:ring-3 focus-within:ring-secondary md:flex">
           <Search className="size-4 shrink-0" aria-hidden="true" />
           <input
             type="search"
-            placeholder="Search store data..."
+            placeholder="Cari pesanan atau pasangan..."
             className="min-w-0 flex-1 bg-transparent text-sm text-neutral-900 outline-none placeholder:text-neutral-400"
           />
         </label>
         <div ref={notificationsRef} className="relative">
           <button
             type="button"
-            className="relative grid size-10 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-500 shadow-sm shadow-neutral-200/80 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+            className="relative grid size-10 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-500 shadow-sm shadow-neutral-200/80 transition hover:border-primary/30 hover:bg-secondary hover:text-primary"
             aria-label="Notifications"
             onClick={() => {
               setShowNotifications((value) => !value);
@@ -132,7 +132,7 @@ export function AppHeaderClient({ user }: AppHeaderClientProps) {
                     type="button"
                     className="flex w-full gap-3 rounded-xl px-2 py-2.5 text-left transition hover:bg-neutral-50"
                   >
-                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-secondary text-primary">
                       <Icon className="size-4" aria-hidden="true" />
                     </span>
                     <span className="min-w-0 flex-1">
@@ -161,14 +161,14 @@ export function AppHeaderClient({ user }: AppHeaderClientProps) {
               setShowNotifications(false);
             }}
           >
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-blue-700 text-xs font-semibold text-white">
+            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
               {initials}
             </span>
             <span className="min-w-0 flex-1 text-left">
               <span className="block truncate text-sm font-semibold text-neutral-950">
                 {user.name}
               </span>
-              <span className="block truncate text-xs text-neutral-500">Store Manager</span>
+              <span className="block truncate text-xs text-neutral-500">Wedding Consultant</span>
             </span>
             <ChevronDown className="size-4 shrink-0 text-neutral-400" aria-hidden="true" />
           </button>
@@ -199,7 +199,7 @@ export function AppHeaderClient({ user }: AppHeaderClientProps) {
           ) : null}
         </div>
 
-        <div className="grid size-9 place-items-center rounded-full bg-blue-700 text-xs font-semibold text-white sm:hidden">
+        <div className="grid size-9 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground sm:hidden">
           {initials}
         </div>
       </div>
@@ -239,9 +239,9 @@ function getPageTitle(pathname: string) {
 }
 
 function getPageDescription(pathname: string) {
-  if (pathname.startsWith("/dashboard/orders")) return "Review ecommerce orders and fulfillment.";
-  if (pathname.startsWith("/dashboard/products")) return "Manage catalog, stock, and product status.";
-  if (pathname.startsWith("/dashboard/profile")) return "Admin account, permissions, and access summary.";
-  if (pathname.startsWith("/dashboard/settings")) return "Store configuration and operational controls.";
-  return "Monitor ecommerce performance and store health.";
+  if (pathname.startsWith("/dashboard/orders")) return "Pantau pesanan undangan digital dan status pembayaran.";
+  if (pathname.startsWith("/dashboard/products")) return "Kelola katalog template dan paket yang tersedia.";
+  if (pathname.startsWith("/dashboard/profile")) return "Akun admin, hak akses, dan ringkasan aktivitas.";
+  if (pathname.startsWith("/dashboard/settings")) return "Konfigurasi platform dan kontrol operasional.";
+  return "Pantau performa pesanan dan kesehatan platform Vowly.";
 }

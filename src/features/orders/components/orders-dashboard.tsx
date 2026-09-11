@@ -2,14 +2,13 @@
 
 import { useMemo, useState } from "react";
 import {
-  ArrowDownUp,
+  CalendarCheck,
   ChevronLeft,
   ChevronRight,
   Clock3,
-  PackageCheck,
   Search,
   SlidersHorizontal,
-  Truck,
+  Wallet,
 } from "lucide-react";
 import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -17,127 +16,39 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Select, type SelectOption } from "@/components/ui/select";
 import { StatCard } from "@/components/ui/stat-card";
 import { Toast } from "@/components/ui/toast";
+import { formatRupiah, packages } from "@/features/undangan-digital/wizard/wizard-data";
 
-type OrderStatus = "Pending" | "In transit" | "Delivered" | "Delayed";
+type OrderStatus = "Menunggu Pembayaran" | "Diproses" | "Selesai" | "Dibatalkan";
 
 type Order = {
   id: string;
-  customer: string;
-  route: string;
+  couple: string;
+  packageName: string;
   status: OrderStatus;
-  courier: string;
-  items: number;
-  weight: string;
-  eta: string;
-  value: string;
+  consultant: string;
+  guests: number;
+  eventDate: string;
+  total: string;
   createdAt: Date;
 };
 
 const orders: Order[] = [
-  {
-    id: "ORD-1048",
-    customer: "White Bengala Box",
-    route: "Los Angeles -> San Diego",
-    status: "In transit",
-    courier: "Darrell Steward",
-    items: 240,
-    weight: "44 lbs",
-    eta: "Today, 14:30",
-    value: "$8,240",
-    createdAt: new Date("2026-07-08"),
-  },
-  {
-    id: "ORD-1047",
-    customer: "Northstar Retail",
-    route: "Phoenix -> Denver",
-    status: "Delivered",
-    courier: "Leslie Alexander",
-    items: 128,
-    weight: "21 lbs",
-    eta: "Jul 06, 09:10",
-    value: "$4,910",
-    createdAt: new Date("2026-07-06"),
-  },
-  {
-    id: "ORD-1046",
-    customer: "Urban Mono",
-    route: "Seattle -> Portland",
-    status: "Pending",
-    courier: "Jacob Jones",
-    items: 86,
-    weight: "18 lbs",
-    eta: "Tomorrow",
-    value: "$2,620",
-    createdAt: new Date("2026-07-09"),
-  },
-  {
-    id: "ORD-1045",
-    customer: "Maverick Supply",
-    route: "Austin -> Dallas",
-    status: "Delayed",
-    courier: "Courtney Henry",
-    items: 164,
-    weight: "32 lbs",
-    eta: "Jul 07, 16:20",
-    value: "$5,780",
-    createdAt: new Date("2026-07-07"),
-  },
-  {
-    id: "ORD-1044",
-    customer: "Luma Market",
-    route: "Miami -> Orlando",
-    status: "In transit",
-    courier: "Robert Fox",
-    items: 92,
-    weight: "17 lbs",
-    eta: "Today, 18:00",
-    value: "$3,420",
-    createdAt: new Date("2026-07-08"),
-  },
-  {
-    id: "ORD-1043",
-    customer: "Alta Hardware",
-    route: "Chicago -> Madison",
-    status: "Delivered",
-    courier: "Jenny Wilson",
-    items: 310,
-    weight: "58 lbs",
-    eta: "Jul 05, 11:40",
-    value: "$11,300",
-    createdAt: new Date("2026-07-05"),
-  },
-  {
-    id: "ORD-1042",
-    customer: "Verde Studio",
-    route: "Boston -> New York",
-    status: "Pending",
-    courier: "Guy Hawkins",
-    items: 73,
-    weight: "12 lbs",
-    eta: "Jul 08, 08:20",
-    value: "$1,920",
-    createdAt: new Date("2026-07-08"),
-  },
-  {
-    id: "ORD-1041",
-    customer: "Keystone Labs",
-    route: "Las Vegas -> Reno",
-    status: "In transit",
-    courier: "Theresa Webb",
-    items: 215,
-    weight: "39 lbs",
-    eta: "Today, 20:45",
-    value: "$7,860",
-    createdAt: new Date("2026-07-08"),
-  },
+  { id: "VOW-1048", couple: "Andi & Siska", packageName: "Journey", status: "Diproses", consultant: "Rina Kartika", guests: 250, eventDate: "12 Des 2026", total: formatRupiah(350_000), createdAt: new Date("2026-07-08") },
+  { id: "VOW-1047", couple: "Raka & Dinda", packageName: "Promise", status: "Menunggu Pembayaran", consultant: "Budi Santoso", guests: 120, eventDate: "20 Jan 2027", total: formatRupiah(220_000), createdAt: new Date("2026-07-06") },
+  { id: "VOW-1046", couple: "Bima & Alya", packageName: "Forever", status: "Selesai", consultant: "Maya Puspita", guests: 400, eventDate: "05 Nov 2026", total: formatRupiah(690_000), createdAt: new Date("2026-07-09") },
+  { id: "VOW-1045", couple: "Yudi & Citra", packageName: "Journey", status: "Selesai", consultant: "Andra Wijaya", guests: 300, eventDate: "18 Okt 2026", total: formatRupiah(350_000), createdAt: new Date("2026-07-07") },
+  { id: "VOW-1044", couple: "Fajar & Intan", packageName: "Promise", status: "Diproses", consultant: "Sari Dewi", guests: 90, eventDate: "22 Feb 2027", total: formatRupiah(220_000), createdAt: new Date("2026-07-08") },
+  { id: "VOW-1043", couple: "Dimas & Ayu", packageName: "Forever", status: "Selesai", consultant: "Fitri Handayani", guests: 500, eventDate: "14 Sep 2026", total: formatRupiah(690_000), createdAt: new Date("2026-07-05") },
+  { id: "VOW-1042", couple: "Rian & Putri", packageName: "Promise", status: "Dibatalkan", consultant: "Doni Pratama", guests: 80, eventDate: "01 Mar 2027", total: formatRupiah(220_000), createdAt: new Date("2026-07-08") },
+  { id: "VOW-1041", couple: "Bayu & Nadia", packageName: "Journey", status: "Diproses", consultant: "Lina Marlina", guests: 260, eventDate: "09 Jan 2027", total: formatRupiah(350_000), createdAt: new Date("2026-07-08") },
 ];
 
 const statusOptions: SelectOption[] = [
-  { label: "All orders", value: "all" },
-  { label: "Pending", value: "Pending" },
-  { label: "In transit", value: "In transit" },
-  { label: "Delivered", value: "Delivered" },
-  { label: "Delayed", value: "Delayed" },
+  { label: "Semua pesanan", value: "all" },
+  { label: "Menunggu Pembayaran", value: "Menunggu Pembayaran" },
+  { label: "Diproses", value: "Diproses" },
+  { label: "Selesai", value: "Selesai" },
+  { label: "Dibatalkan", value: "Dibatalkan" },
 ];
 
 const pageSize = 5;
@@ -158,7 +69,7 @@ export function OrdersDashboard() {
       const matchesStatus = status.value === "all" || order.status === status.value;
       const matchesSearch =
         !normalizedQuery ||
-        [order.id, order.customer, order.route, order.courier]
+        [order.id, order.couple, order.packageName, order.consultant]
           .join(" ")
           .toLowerCase()
           .includes(normalizedQuery);
@@ -175,25 +86,25 @@ export function OrdersDashboard() {
   const columns: DataTableColumn<Order>[] = [
     {
       key: "order",
-      header: "Order",
+      header: "Pesanan",
       cell: (order) => (
         <div>
-          <p className="font-semibold text-neutral-950">{order.id}</p>
+          <p className="font-semibold text-neutral-950">{order.couple}</p>
           <p className="mt-0.5 text-xs text-neutral-500">
-            {order.customer} • {order.items} items
+            {order.id} • {order.guests} tamu
           </p>
         </div>
       ),
     },
     {
-      key: "route",
-      header: "Route",
-      cell: (order) => <p className="text-neutral-700">{order.route}</p>,
+      key: "package",
+      header: "Paket",
+      cell: (order) => <p className="text-neutral-700">{order.packageName}</p>,
     },
     {
-      key: "courier",
-      header: "Courier",
-      cell: (order) => <p className="text-neutral-600">{order.courier}</p>,
+      key: "consultant",
+      header: "Konsultan",
+      cell: (order) => <p className="text-neutral-600">{order.consultant}</p>,
     },
     {
       key: "status",
@@ -201,17 +112,17 @@ export function OrdersDashboard() {
       cell: (order) => <StatusBadge status={order.status} />,
     },
     {
-      key: "eta",
-      header: "ETA",
-      cell: (order) => <p className="text-neutral-600">{order.eta}</p>,
+      key: "eventDate",
+      header: "Tanggal Acara",
+      cell: (order) => <p className="text-neutral-600">{order.eventDate}</p>,
     },
     {
-      key: "value",
-      header: "Value",
+      key: "total",
+      header: "Total",
       headerClassName: "text-right",
       className: "text-right",
       cell: (order) => (
-        <p className="font-semibold text-neutral-950">{order.value}</p>
+        <p className="font-semibold text-neutral-950">{order.total}</p>
       ),
     },
   ];
@@ -236,14 +147,14 @@ export function OrdersDashboard() {
     setStartDate(date);
     if (date && endDate && startOfDay(endDate) < startOfDay(date)) {
       setEndDate(undefined);
-      showAlert("End date was cleared because it cannot be earlier than start date.");
+      showAlert("Tanggal akhir dihapus karena tidak boleh lebih awal dari tanggal mulai.");
     }
     setPage(1);
   }
 
   function updateEndDate(date: Date | undefined) {
     if (date && startDate && startOfDay(date) < startOfDay(startDate)) {
-      showAlert("End date cannot be earlier than start date.");
+      showAlert("Tanggal akhir tidak boleh lebih awal dari tanggal mulai.");
       return;
     }
 
@@ -264,37 +175,37 @@ export function OrdersDashboard() {
     <div className="mx-auto max-w-[1320px] space-y-5">
       <Toast
         open={Boolean(alert)}
-        title="Filter date updated"
+        title="Filter tanggal diperbarui"
         description={alert ?? ""}
         variant="warning"
       />
 
       <div className="grid gap-4 md:grid-cols-4">
-        <StatCard title="Total orders" value="1,284" detail="+12.4% this month" icon={PackageCheck} />
-        <StatCard title="In transit" value="342" detail="28 active routes" icon={Truck} />
-        <StatCard title="Pending" value="86" detail="14 awaiting pickup" icon={Clock3} />
-        <StatCard title="Avg. value" value="$6.8k" detail="Across all shipments" icon={ArrowDownUp} />
+        <StatCard title="Total pesanan" value="1.284" detail="+12.4% bulan ini" icon={CalendarCheck} />
+        <StatCard title="Diproses" value="342" detail="28 pesanan aktif" icon={Clock3} />
+        <StatCard title="Menunggu pembayaran" value="86" detail="14 menunggu konfirmasi" icon={SlidersHorizontal} />
+        <StatCard title="Rata-rata nilai" value={formatRupiah(340_000)} detail={`Dari ${packages.length} paket tersedia`} icon={Wallet} />
       </div>
 
       <section className="rounded-xl border border-neutral-200/70 bg-white p-4 shadow-sm shadow-neutral-200/50">
         <PageHeader
-          title="Order List"
-          description="Dummy orders for the starter template."
+          title="Daftar Pesanan"
+          description="Data pesanan undangan digital dummy untuk starter template Vowly."
         />
 
         <div className="mt-4 rounded-xl border border-neutral-200/70 bg-neutral-50/70 p-3">
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(260px,1fr)_180px_210px_210px_auto] xl:items-end">
             <label className="space-y-1.5">
               <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
-                Search
+                Cari
               </span>
-              <span className="flex h-10 items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 text-neutral-500 shadow-sm shadow-neutral-200/50 transition focus-within:border-blue-300 focus-within:ring-3 focus-within:ring-blue-100">
+              <span className="flex h-10 items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 text-neutral-500 shadow-sm shadow-neutral-200/50 transition focus-within:border-primary/40 focus-within:ring-3 focus-within:ring-secondary">
                 <Search className="size-4 shrink-0" aria-hidden="true" />
                 <input
                   type="search"
                   value={query}
                   onChange={(event) => updateQuery(event.target.value)}
-                  placeholder="Order, route, courier..."
+                  placeholder="Pesanan, pasangan, konsultan..."
                   className="min-w-0 flex-1 bg-transparent text-sm text-neutral-900 outline-none placeholder:text-neutral-400"
                 />
               </span>
@@ -318,24 +229,24 @@ export function OrdersDashboard() {
             </div>
             <div className="space-y-1.5">
               <span className="block text-xs font-semibold uppercase tracking-wide text-neutral-400">
-                Start date
+                Tanggal mulai
               </span>
               <DatePicker
                 value={startDate}
                 onChange={updateStartDate}
-                placeholder="Start date"
+                placeholder="Tanggal mulai"
                 open={openDateFilter === "start"}
                 onOpenChange={(open) => setOpenDateFilter(open ? "start" : null)}
               />
             </div>
             <div className="space-y-1.5">
               <span className="block text-xs font-semibold uppercase tracking-wide text-neutral-400">
-                End date
+                Tanggal akhir
               </span>
               <DatePicker
                 value={endDate}
                 onChange={updateEndDate}
-                placeholder="End date"
+                placeholder="Tanggal akhir"
                 open={openDateFilter === "end"}
                 onOpenChange={(open) => setOpenDateFilter(open ? "end" : null)}
                 disabled={startDate ? { before: startDate } : undefined}
@@ -348,7 +259,7 @@ export function OrdersDashboard() {
                 onClick={clearFilters}
               >
                 <SlidersHorizontal className="size-4" aria-hidden="true" />
-                Clear filter
+                Hapus filter
               </button>
             ) : null}
           </div>
@@ -359,14 +270,14 @@ export function OrdersDashboard() {
             columns={columns}
             rows={visibleOrders}
             getRowKey={(order) => order.id}
-            emptyMessage="No orders match the current filters."
+            emptyMessage="Tidak ada pesanan yang cocok dengan filter saat ini."
           />
         </div>
 
         <div className="mt-4 flex flex-col gap-3 text-sm text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            Showing {filteredOrders.length ? (page - 1) * pageSize + 1 : 0}-
-            {Math.min(page * pageSize, filteredOrders.length)} of {filteredOrders.length} orders
+            Menampilkan {filteredOrders.length ? (page - 1) * pageSize + 1 : 0}-
+            {Math.min(page * pageSize, filteredOrders.length)} dari {filteredOrders.length} pesanan
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -376,7 +287,7 @@ export function OrdersDashboard() {
               onClick={() => setPage((value) => Math.max(1, value - 1))}
             >
               <ChevronLeft className="size-4" aria-hidden="true" />
-              Prev
+              Sebelumnya
             </button>
             <span className="rounded-xl bg-neutral-100 px-3 py-2 text-xs font-semibold text-neutral-700">
               {page} / {totalPages}
@@ -387,7 +298,7 @@ export function OrdersDashboard() {
               disabled={page === totalPages}
               onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
             >
-              Next
+              Berikutnya
               <ChevronRight className="size-4" aria-hidden="true" />
             </button>
           </div>
@@ -419,10 +330,10 @@ function endOfDay(date: Date) {
 
 function StatusBadge({ status }: { status: OrderStatus }) {
   const styles: Record<OrderStatus, string> = {
-    Pending: "bg-amber-50 text-amber-700",
-    "In transit": "bg-sky-50 text-sky-700",
-    Delivered: "bg-emerald-50 text-emerald-700",
-    Delayed: "bg-rose-50 text-rose-700",
+    "Menunggu Pembayaran": "bg-amber-50 text-amber-700",
+    Diproses: "bg-sky-50 text-sky-700",
+    Selesai: "bg-emerald-50 text-emerald-700",
+    Dibatalkan: "bg-rose-50 text-rose-700",
   };
 
   return (
@@ -436,7 +347,7 @@ const orderSelectClassNames = {
   control: ({ isFocused }: { isFocused: boolean }) =>
     `min-h-10 rounded-xl border bg-white text-sm transition ${
       isFocused
-        ? "border-blue-300 ring-3 ring-blue-100"
+        ? "border-primary/40 ring-3 ring-secondary"
         : "border-neutral-200"
     }`,
   valueContainer: () => "gap-1 px-3",
@@ -450,7 +361,7 @@ const orderSelectClassNames = {
   option: ({ isFocused, isSelected }: { isFocused: boolean; isSelected: boolean }) =>
     `cursor-pointer rounded-xl px-3 py-2 text-sm ${
       isSelected
-        ? "bg-blue-50 text-blue-700"
+        ? "bg-secondary text-primary"
         : isFocused
           ? "bg-neutral-100 text-neutral-950"
           : "text-neutral-600"

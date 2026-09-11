@@ -4,42 +4,30 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Activity,
-  Box,
-  ChartNoAxesCombined,
-  CreditCard,
   Grid2X2,
-  HelpCircle,
+  LayoutTemplate,
   LogOut,
-  Package,
+  Mail,
   PanelLeftClose,
   PanelLeftOpen,
-  Percent,
   Settings,
-  ShoppingBag,
   UserRound,
   type LucideIcon,
 } from "lucide-react";
 
+// Only real, working destinations — no dead links to keep the menu clean.
 const mainItems = [
   { href: "/dashboard", label: "Overview", icon: Grid2X2, active: true },
-  { href: "/dashboard/orders", label: "Orders", icon: ShoppingBag },
-  { href: "/dashboard/products", label: "Products", icon: Package },
-  { href: "/dashboard", label: "Customers", icon: UserRound, badge: "24" },
-  { href: "/dashboard", label: "Inventory", icon: Box },
-  { href: "/dashboard", label: "Discounts", icon: Percent },
+  { href: "/dashboard/orders", label: "Orders", icon: Mail },
+  { href: "/dashboard/products", label: "Products", icon: LayoutTemplate },
 ] as const;
 
 const generalItems = [
-  { href: "/dashboard", label: "Analytics", icon: ChartNoAxesCombined },
-  { href: "/dashboard", label: "Payments", icon: CreditCard },
   { href: "/dashboard/profile", label: "Profile", icon: UserRound },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ] as const;
 
 const otherItems = [
-  { href: "/dashboard", label: "Activity", icon: Activity },
-  { href: "/dashboard", label: "Support", icon: HelpCircle },
   { href: "/", label: "Log out", icon: LogOut },
 ] as const;
 
@@ -56,24 +44,24 @@ export function AppSidebarClient() {
       <div className="relative flex items-center justify-between gap-2">
         <Link
           href="/dashboard"
-          className={`flex min-w-0 items-center rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-500 ${
+          className={`flex min-w-0 items-center rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus ${
             collapsed ? "justify-center" : "gap-3"
           }`}
-          aria-label="Ganipedia dashboard"
+          aria-label="Vowly dashboard"
         >
           {collapsed ? (
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-sm font-semibold text-blue-700">
-              GP
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-secondary font-serif text-lg font-semibold text-primary">
+              V
             </span>
           ) : (
-            <span className="truncate text-xl font-semibold tracking-tight">
-              gani<span className="text-blue-600">pedia</span>
+            <span className="truncate font-serif text-xl font-semibold text-accent">
+              Vowly
             </span>
           )}
         </Link>
         <button
           type="button"
-          className={`grid size-8 shrink-0 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-500 shadow-sm shadow-neutral-200/70 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 ${
+          className={`grid size-8 shrink-0 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-500 shadow-sm shadow-neutral-200/70 transition hover:border-primary/30 hover:bg-secondary hover:text-primary ${
             collapsed ? "absolute -right-7 top-1 z-40" : ""
           }`}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -188,7 +176,7 @@ function SidebarItem({
         collapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2.5"
       } ${
         active
-          ? "bg-blue-50/90 text-blue-700"
+          ? "bg-secondary/90 text-primary"
           : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-950"
       }`}
     >
@@ -198,7 +186,7 @@ function SidebarItem({
       ) : null}
       {badge ? (
         <span
-          className={`grid place-items-center rounded-full bg-rose-500 text-[11px] font-semibold text-white shadow-lg shadow-rose-100 ${
+          className={`grid place-items-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground shadow-lg shadow-primary/20 ${
             collapsed ? "absolute right-1 top-1 size-4 text-[9px]" : "size-6"
           }`}
         >

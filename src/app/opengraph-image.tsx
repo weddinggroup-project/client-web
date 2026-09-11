@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
+import { siteConfig } from "@/lib/site";
 
-export const alt = "Ganipedia Next.js Starter";
+export const alt = siteConfig.title;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -11,7 +12,7 @@ export default function OpenGraphImage() {
         style={{
           alignItems: "center",
           background:
-            "radial-gradient(circle at 78% 32%, #4338ca 0, #172554 25%, #070a12 58%)",
+            "radial-gradient(circle at 78% 32%, #a97078 0, #6b3f45 25%, #201c1b 58%)",
           color: "white",
           display: "flex",
           height: "100%",
@@ -22,14 +23,14 @@ export default function OpenGraphImage() {
         <div style={{ display: "flex", flexDirection: "column", maxWidth: 880 }}>
           <div
             style={{
-              color: "#93c5fd",
+              color: "#f6e4e8",
               display: "flex",
               fontSize: 26,
               letterSpacing: 4,
               textTransform: "uppercase",
             }}
           >
-            Ganipedia starter
+            {siteConfig.name} — Wedding Planner
           </div>
           <div
             style={{
@@ -41,7 +42,7 @@ export default function OpenGraphImage() {
               marginTop: 24,
             }}
           >
-            Mulai lebih cepat. Tetap rapi saat bertumbuh.
+            Rencanakan Pernikahan Impianmu Tanpa Ribet
           </div>
         </div>
       </div>

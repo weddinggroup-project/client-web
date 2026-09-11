@@ -2,15 +2,11 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  HiArrowRight,
-  HiEnvelope,
-  HiExclamationCircle,
-  HiLockClosed,
-} from "react-icons/hi2";
+import Link from "next/link";
+import { HiExclamationCircle } from "react-icons/hi2";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { AuthField } from "./auth-field";
+import { PasswordField } from "./password-field";
 
 const dummyAdmin = {
   email: "admin@gmail.com",
@@ -44,82 +40,51 @@ export function EmailPasswordForm({ enabled }: { enabled: boolean }) {
   }
 
   return (
-    <form className="space-y-4" onSubmit={onSubmit}>
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <div className="relative">
-          <HiEnvelope
-            className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-neutral-400"
-            aria-hidden="true"
-          />
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            defaultValue={dummyAdmin.email}
-            placeholder="admin@gmail.com"
-            className="h-12 rounded-2xl border-slate-200 bg-slate-50/60 pl-10 shadow-none focus-visible:outline-blue-500"
-          />
-        </div>
-      </div>
+    <form className="space-y-5" onSubmit={onSubmit}>
+      <AuthField
+        label="Email Address"
+        id="email"
+        name="email"
+        type="email"
+        required
+        autoComplete="email"
+        defaultValue={dummyAdmin.email}
+        placeholder="nama@email.com"
+      />
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between gap-3">
-          <Label htmlFor="password">Password</Label>
-          <button
-            type="button"
-            className="text-sm font-medium text-blue-700 transition hover:text-blue-800"
+      <PasswordField
+        label="Password"
+        id="password"
+        name="password"
+        required
+        minLength={8}
+        autoComplete="current-password"
+        defaultValue={dummyAdmin.password}
+        placeholder="Masukkan password"
+        labelAside={
+          <Link
+            href="/forgot-password"
+            className="text-xs font-medium text-primary transition hover:text-primary-hover"
           >
-            Reset Password
-          </button>
-        </div>
-        <div className="relative">
-          <HiLockClosed
-            className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-neutral-400"
-            aria-hidden="true"
-          />
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            required
-            minLength={8}
-            autoComplete="current-password"
-            defaultValue={dummyAdmin.password}
-            placeholder="Admin123"
-            className="h-12 rounded-2xl border-slate-200 bg-slate-50/60 pl-10 shadow-none focus-visible:outline-blue-500"
-          />
-        </div>
-      </div>
-
-      <label className="flex w-fit items-center gap-2 text-sm text-neutral-600">
-        <input
-          type="checkbox"
-          className="size-4 rounded border-neutral-300 accent-blue-600"
-          defaultChecked
-        />
-        Remember Password
-      </label>
+            Lupa Kata Sandi?
+          </Link>
+        }
+      />
 
       {error ? (
-        <p className="flex items-start gap-2 rounded-xl bg-red-50 p-3 text-sm leading-6 text-red-700">
-          <HiExclamationCircle
-            className="mt-0.5 size-5 shrink-0"
-            aria-hidden="true"
-          />
+        <p className="flex items-start gap-2 rounded-xl bg-error/10 p-3 text-sm leading-6 text-error">
+          <HiExclamationCircle className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
           {error}
         </p>
       ) : null}
 
       <Button
         type="submit"
-        className="h-12 w-full rounded-2xl bg-[#1559d8] text-white shadow-lg shadow-blue-600/20 hover:bg-[#0f46b5]"
+        variant="rose"
+        className="h-12 w-full px-8"
         disabled={!enabled || pending}
       >
-        {pending ? "Memproses..." : "Masuk dengan email"}
-        <HiArrowRight className="size-4" aria-hidden="true" />
+        {pending ? "Memproses..." : "Login"}
       </Button>
     </form>
   );

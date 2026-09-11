@@ -4,10 +4,10 @@ import { nextCookies } from "better-auth/next-js";
 import { clientEnv, serverEnv } from "@/lib/env";
 
 const developmentSecret =
-  "ganipedia-development-only-secret-change-before-production";
+  "vowly-development-only-secret-change-before-production";
 
 export const auth = betterAuth({
-  appName: "Ganipedia",
+  appName: "Vowly",
   baseURL: serverEnv.BETTER_AUTH_URL ?? clientEnv.NEXT_PUBLIC_APP_URL,
   secret: serverEnv.BETTER_AUTH_SECRET ?? developmentSecret,
   emailAndPassword: {

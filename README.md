@@ -1,30 +1,31 @@
-# Ganipedia Next.js Starter
+# Vowly — Wedding Planner Platform
 
-Starter Next.js modern dan reusable untuk membuat project baru dengan fondasi
-yang konsisten, aman, dan production-ready.
+Vowly membantu calon pengantin merencanakan pernikahan yang lebih terarah,
+hemat waktu, dan minim stres — mulai dari vendor, budget, undangan digital,
+hingga tamu undangan, semua dalam satu tempat.
 
-Repository ini adalah **starter**, bukan portfolio final. Blueprint portfolio di
-folder `docs/` ditujukan untuk project Next.js baru yang dibuat secara terpisah
-menggunakan `create-next-app`.
+Repository ini adalah **frontend client** Vowly: landing page, pusat bantuan,
+halaman produk "Undangan Digital" beserta wizard pemesanannya, alur
+autentikasi (login/daftar/lupa password), dan admin dashboard internal.
 
 ## Stack
 
 - Next.js 16 App Router dan React 19
 - TypeScript strict
-- Tailwind CSS 4
+- Tailwind CSS 4 dengan design token custom (lihat `src/app/globals.css`)
 - Server Components sebagai default
 - Better Auth email/password-ready dengan dummy admin starter
 - Routing satu bahasa tanpa locale prefix
 - Typed API client dan standard API response
 - Zod validation dan normalized errors
 - Structured global logger
-- React Select dan React Day Picker
+- React Select dan React Day Picker (dipakai ulang dengan tema Vowly di wizard)
 - React Icons dengan targeted imports
 - Vitest, Testing Library, dan Playwright
 - ESLint, Husky, lint-staged, dan GitHub Actions
-- Docker standalone multi-stage
+- Docker standalone multi-stage + Jenkins pipeline (`Jenkinsfile`)
 
-## Menjalankan starter
+## Menjalankan project
 
 ```bash
 pnpm install
@@ -34,13 +35,13 @@ pnpm dev
 
 Buka:
 
-- [http://localhost:3000](http://localhost:3000)
+- [http://localhost:3303](http://localhost:3303)
 
 ## Perintah
 
 | Perintah | Kegunaan |
 | --- | --- |
-| `pnpm dev` | Development server |
+| `pnpm dev` | Development server di port 3303 |
 | `pnpm dev:clean` | Bersihkan cache Next.js lalu jalankan dev server |
 | `pnpm clean` | Menghapus cache `.next` |
 | `pnpm lint` | Menjalankan ESLint |
@@ -49,27 +50,35 @@ Buka:
 | `pnpm test:e2e` | Browser test Playwright |
 | `pnpm build` | Production build |
 | `pnpm check` | Lint, typecheck, test, dan build |
-| `pnpm docker:build` | Membuat Docker image |
-| `pnpm docker:up` | Menjalankan Docker Compose |
+| `pnpm docker:build` | Membuat Docker image (`vowly-client`) |
+| `pnpm docker:up` | Menjalankan via Docker Compose di port 3303 |
 
-## Struktur starter
+## Struktur project
 
 ```text
 src/
 ├── app/
-│   ├── dashboard/            # Protected admin shell
-│   ├── sign-in/              # Dummy admin login
-│   ├── api/                  # Auth dan health
+│   ├── page.tsx               # Landing page
+│   ├── panduan-pengguna/      # Pusat bantuan
+│   ├── undangan-digital/      # Halaman produk + wizard pemesanan
+│   ├── sign-in/               # Login
+│   ├── sign-up/               # Daftar akun
+│   ├── forgot-password/       # Lupa password
+│   ├── dashboard/             # Admin dashboard (protected)
+│   ├── api/                   # Auth dan health
 │   └── layout.tsx
 ├── components/
-│   ├── layout/               # Site dan application shell
-│   ├── sections/             # Demo landing sections
-│   └── ui/                   # Reusable UI primitives
-├── config/                   # Typed configuration dan constants
-├── features/                 # Business/domain modules
+│   ├── landing/                # Section landing page (navbar, hero, footer, dst.)
+│   └── ui/                     # Reusable UI primitives (Button, Card, Input, dst.)
+├── config/                     # Typed configuration dan constants
+├── features/                   # Business/domain modules
+│   ├── auth/                   # Form login, daftar, lupa password
+│   ├── help-center/             # Pusat bantuan
+│   ├── undangan-digital/       # Halaman produk + wizard pemesanan
+│   ├── orders/, products/, profile/  # Modul admin dashboard
 ├── lib/
-│   ├── api/                  # API client dan response helpers
-│   ├── auth/                 # Better Auth dan session helpers
+│   ├── api/                    # API client dan response helpers
+│   ├── auth/                   # Better Auth dan session helpers
 │   ├── errors/
 │   ├── helpers/
 │   ├── logger/
@@ -78,87 +87,14 @@ src/
 └── types/
 ```
 
-## Mengeksekusi prompt portfolio di project Next.js baru
+## Environment
 
-Blueprint portfolio tersedia di:
-
-- [docs/README.md](docs/README.md)
-- [docs/portfolio-brief.md](docs/portfolio-brief.md)
-- [docs/prompt-from-scratch.md](docs/prompt-from-scratch.md)
-- [docs/structure-project.md](docs/structure-project.md)
-- [docs/implementation-roadmap.md](docs/implementation-roadmap.md)
-
-### Langkah eksekusi
-
-1. Buat project Next.js baru:
-
-```bash
-pnpm create next-app personal-portfolio \
-  --typescript \
-  --tailwind \
-  --eslint \
-  --app \
-  --src-dir \
-  --import-alias "@/*"
-
-cd personal-portfolio
-```
-
-2. Salin folder `docs/` ke project tersebut.
-3. Buka `personal-portfolio` sebagai working directory coding agent.
-4. Lengkapi data dan status verifikasi pada `docs/portfolio-brief.md`.
-5. Tentukan fitur opsional yang benar-benar dibutuhkan.
-6. Berikan prompt berikut kepada coding agent.
-
-```text
-Gunakan project Next.js yang sedang aktif. Project ini sudah dibuat menggunakan
-create-next-app. Jangan membuat project atau scaffold lain di dalamnya.
-
-Baca dokumen berikut secara berurutan:
-
-1. docs/portfolio-brief.md
-2. docs/structure-project.md
-3. docs/implementation-roadmap.md
-4. docs/prompt-from-scratch.md
-
-Implementasikan portfolio berdasarkan specification tersebut di project ini.
-Hapus halaman default create-next-app setelah homepage portfolio siap.
-
-Gunakan informasi publik berikut sebagai referensi:
-
-- LinkedIn: https://www.linkedin.com/in/ganiramadhan35/
-- Ganipedia: https://ganipedia.com
-
-Jangan mengarang employment history, pendidikan, metric, testimonial, atau
-informasi personal yang tidak tersedia pada brief maupun sumber yang dapat
-diverifikasi.
-
-Kerjakan sesuai fase pada implementation-roadmap.md. Setelah setiap fase,
-jalankan pemeriksaan yang relevan dan jelaskan file yang berubah.
-```
-
-### Prompt singkat untuk coding agent
-
-Jika brief sudah lengkap:
-
-```text
-Bangun portfolio Gani Ramadhan pada project Next.js ini menggunakan
-docs/portfolio-brief.md sebagai source of truth content,
-docs/structure-project.md sebagai aturan arsitektur, dan
-docs/implementation-roadmap.md sebagai urutan pengerjaan. Ikuti execution rules
-dari docs/prompt-from-scratch.md.
-
-Project sudah dibuat menggunakan create-next-app. Jangan membuat nested project
-atau scaffold baru.
-```
-
-## Authentication
-
-Isi environment berikut jika project portfolio membutuhkan sign-in:
+Variabel wajib untuk menjalankan auth (lihat `.env.example` untuk daftar lengkap):
 
 ```dotenv
+NEXT_PUBLIC_APP_URL=http://localhost:3303
 BETTER_AUTH_SECRET=
-BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_URL=http://localhost:3303
 ```
 
 ## Pemeriksaan project
@@ -171,13 +107,22 @@ pnpm build
 pnpm test:e2e
 ```
 
-Sesuaikan command dengan tooling yang benar-benar dipasang pada project baru.
-
 ## Docker
 
 ```bash
+cp .env.example .env.local
 pnpm docker:up
 ```
 
+Aplikasi tersedia di [http://localhost:3303](http://localhost:3303).
+
 Dockerfile menggunakan Next.js standalone output, BuildKit cache, non-root
-runtime, runtime-injected secrets, dan health check `/api/health`.
+runtime, runtime-injected secrets, dan health check `/api/health` — semuanya
+berjalan di port `3303` agar konsisten dengan `docker-compose.yml` dan
+pipeline CI/CD di `Jenkinsfile`.
+
+## CI/CD
+
+`Jenkinsfile` membangun image `vowly-client`, mem-push ke registry, lalu
+melakukan zero-downtime deploy ke server produksi via SSH — container selalu
+di-expose pada port `3303` di dalam Docker network `vowly`.

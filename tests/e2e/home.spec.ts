@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-test("starter landing page renders in Indonesian", async ({ page }) => {
+test("landing page renders the Vowly hero", async ({ page }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: /Admin commerce yang clean/i }),
+    page.getByRole("heading", { name: /Every Detail Tells Your Story/i }),
   ).toBeVisible();
 });
 
@@ -25,35 +25,35 @@ test("dashboard renders with starter bypass session", async ({ page }) => {
 test("orders page renders dummy order management", async ({ page }) => {
   await page.goto("/dashboard/orders");
   await expect(page.getByRole("heading", { name: /^Orders$/i })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /Order List/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Daftar Pesanan/i })).toBeVisible();
 });
 
 test("products page supports dummy CRUD flow", async ({ page }) => {
   await page.goto("/dashboard/products");
   await expect(page.getByRole("heading", { name: /^Products$/i })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /Product Catalog/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Katalog Template/i })).toBeVisible();
   await expect(page.getByTestId("products-shell")).toHaveAttribute("data-hydrated", "true");
 
-  await page.getByRole("button", { name: /New product/i }).click();
-  await expect(page.getByRole("heading", { name: /Add Product/i })).toBeVisible();
-  await page.getByPlaceholder("Luna Knit Sweater").fill("Test Product");
-  await page.getByPlaceholder("LKS-302").fill("TST-001");
-  await page.getByRole("button", { name: /^Add product$/i }).click();
-  await expect(page.getByText("Product added successfully.")).toBeVisible();
-  await expect(page.getByText("Test Product")).toBeVisible();
+  await page.getByRole("button", { name: /Template baru/i }).click();
+  await expect(page.getByRole("heading", { name: /Tambah Template/i })).toBeVisible();
+  await page.getByPlaceholder("Blush Elegance").fill("Test Template");
+  await page.getByPlaceholder("BLE-001").fill("TST-001");
+  await page.getByRole("button", { name: /^Tambah template$/i }).click();
+  await expect(page.getByText("Template berhasil ditambahkan.")).toBeVisible();
+  await expect(page.getByText("Test Template")).toBeVisible();
 
-  await page.getByRole("button", { name: /Delete Test Product/i }).click();
-  await expect(page.getByRole("heading", { name: /Delete product/i })).toBeVisible();
-  await page.getByRole("button", { name: /^Delete product$/i }).click();
-  await expect(page.getByText("Test Product deleted.")).toBeVisible();
+  await page.getByRole("button", { name: /Delete Test Template/i }).click();
+  await expect(page.getByRole("heading", { name: /Hapus template\?/i })).toBeVisible();
+  await page.getByRole("button", { name: /^Hapus template$/i }).click();
+  await expect(page.getByText("Test Template dihapus.")).toBeVisible();
 });
 
 test("profile and settings pages render", async ({ page }) => {
   await page.goto("/dashboard/profile");
-  await expect(page.getByRole("heading", { name: /Admin Ganipedia/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Admin Vowly/i })).toBeVisible();
 
   await page.goto("/dashboard/settings");
-  await expect(page.getByRole("heading", { name: /Store Settings/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Pengaturan Platform/i })).toBeVisible();
 });
 
 test("health endpoint responds successfully", async ({ request }) => {

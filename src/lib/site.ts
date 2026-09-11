@@ -1,9 +1,9 @@
 export const siteConfig = {
-  name: "Ganipedia",
-  title: "Ganipedia Next.js Starter",
+  name: "Vowly",
+  title: "Vowly — Rencanakan Pernikahan Impianmu",
   description:
-    "Starter Next.js modern dari Ganipedia untuk membangun produk web yang rapi, aman, dan mudah dikembangkan.",
-  url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+    "Vowly membantu calon pengantin merencanakan pernikahan yang lebih terarah, hemat waktu, dan minim stres — mulai dari vendor, budget, hingga tamu undangan.",
+  url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3303",
   links: {
     github: "https://github.com/ganiramadhan",
     docs: "https://nextjs.org/docs",

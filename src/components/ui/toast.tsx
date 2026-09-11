@@ -15,7 +15,7 @@ const variants: Record<
 > = {
   success: { icon: CheckCircle2, tone: "bg-emerald-50 text-emerald-600" },
   warning: { icon: AlertCircle, tone: "bg-amber-50 text-amber-600" },
-  info: { icon: Info, tone: "bg-blue-50 text-blue-600" },
+  info: { icon: Info, tone: "bg-secondary text-primary" },
 };
 
 export function Toast({

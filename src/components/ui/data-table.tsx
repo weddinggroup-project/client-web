@@ -7,7 +7,6 @@ export type DataTableColumn<T> = {
   cell: (row: T) => ReactNode;
   className?: string;
   headerClassName?: string;
-  mobileLabel?: ReactNode;
 };
 
 type DataTableProps<T> = {
@@ -17,6 +16,11 @@ type DataTableProps<T> = {
   emptyMessage: string;
 };
 
+/**
+ * A single table that scrolls horizontally on narrow screens, rather than
+ * rendering a second duplicate "mobile card" layout — one row of markup per
+ * row of data, so nothing can drift out of sync between breakpoints.
+ */
 export function DataTable<T>({
   columns,
   rows,
@@ -25,48 +29,36 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   return (
     <div className="overflow-hidden rounded-xl border border-neutral-200">
-      <table className="hidden w-full border-collapse lg:table">
-        <thead className="bg-neutral-50">
-          <tr>
-            {columns.map((column) => (
-              <th
-                key={column.key}
-                className={cn(
-                  "px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-neutral-400",
-                  column.headerClassName,
-                )}
-              >
-                {column.header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-neutral-200">
-          {rows.map((row) => (
-            <tr key={getRowKey(row)} className="text-sm transition hover:bg-neutral-50">
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead className="bg-neutral-50">
+            <tr>
               {columns.map((column) => (
-                <td key={column.key} className={cn("px-4 py-4", column.className)}>
-                  {column.cell(row)}
-                </td>
+                <th
+                  key={column.key}
+                  className={cn(
+                    "px-4 py-3 text-left text-xs font-semibold whitespace-nowrap text-neutral-400 uppercase tracking-wide",
+                    column.headerClassName,
+                  )}
+                  scope="col"
+                >
+                  {column.header}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div className="divide-y divide-neutral-200 lg:hidden">
-        {rows.map((row) => (
-          <article key={getRowKey(row)} className="space-y-3 px-4 py-4 text-sm">
-            {columns.map((column) => (
-              <div key={column.key} className="flex items-start justify-between gap-4">
-                <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-neutral-400">
-                  {column.mobileLabel ?? column.header}
-                </span>
-                <div className="min-w-0 text-right">{column.cell(row)}</div>
-              </div>
+          </thead>
+          <tbody className="divide-y divide-neutral-200">
+            {rows.map((row) => (
+              <tr key={getRowKey(row)} className="text-sm transition hover:bg-neutral-50">
+                {columns.map((column) => (
+                  <td key={column.key} className={cn("px-4 py-4", column.className)}>
+                    {column.cell(row)}
+                  </td>
+                ))}
+              </tr>
             ))}
-          </article>
-        ))}
+          </tbody>
+        </table>
       </div>
 
       {!rows.length ? (

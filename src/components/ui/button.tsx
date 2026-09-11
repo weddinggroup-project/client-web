@@ -11,6 +11,11 @@ const variants = {
     "border border-slate-300 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50",
   ghost: "text-slate-700 hover:bg-slate-100 hover:text-slate-950",
   destructive: "bg-red-600 text-white hover:bg-red-700",
+  rose: "rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary-hover hover:scale-[1.02] active:scale-[0.98]",
+  "outline-light":
+    "rounded-full border border-white/70 text-white hover:bg-white/10 hover:scale-[1.02] active:scale-[0.98]",
+  "outline-brand":
+    "rounded-full border border-border bg-background text-foreground hover:border-primary/40 hover:bg-secondary",
 } as const;
 
 type ButtonVariant = keyof typeof variants;

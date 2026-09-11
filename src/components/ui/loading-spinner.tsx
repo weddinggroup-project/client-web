@@ -22,7 +22,7 @@ export function LoadingSpinner({
       role="status"
       aria-live="polite"
     >
-      <ImSpinner2 className="size-5 animate-spin text-blue-400" aria-hidden="true" />
+      <ImSpinner2 className="size-5 animate-spin text-accent" aria-hidden="true" />
       <span className={cn("text-sm", fullScreen ? "text-slate-300" : "text-slate-600")}>
         {label}
       </span>

@@ -1,44 +1,44 @@
 import {
   Bell,
   CreditCard,
-  Globe2,
   KeyRound,
   LockKeyhole,
+  MapPinned,
   ReceiptText,
   ShieldCheck,
   SlidersHorizontal,
   Store,
-  Truck,
+  UserCog,
   UsersRound,
 } from "lucide-react";
 import { requireSession } from "@/lib/auth/session";
 
 const adminSections = [
   {
-    title: "Store Operation",
-    description: "Configure storefront identity, checkout defaults, and fulfillment rules.",
+    title: "Operasional Platform",
+    description: "Konfigurasi identitas platform, paket default, dan aturan pemesanan.",
     icon: Store,
-    items: ["Store name: Ganipedia Commerce", "Currency: USD", "Timezone: Asia/Jakarta"],
+    items: ["Nama platform: Vowly", "Mata uang: IDR", "Zona waktu: Asia/Jakarta"],
   },
   {
-    title: "Admin Access",
-    description: "Control owner, admin, finance, and warehouse access policies.",
+    title: "Akses Admin",
+    description: "Kontrol kebijakan akses owner, admin, dan konsultan pernikahan.",
     icon: ShieldCheck,
-    items: ["Owner approval required", "Role templates enabled", "Audit trail retained"],
+    items: ["Persetujuan owner diperlukan", "Role template aktif", "Audit trail tersimpan"],
   },
   {
-    title: "Security",
-    description: "Prepare production-grade password, MFA, and session settings.",
+    title: "Keamanan",
+    description: "Pengaturan password, MFA, dan sesi untuk siap produksi.",
     icon: LockKeyhole,
-    items: ["MFA recommended", "7 day session window", "Device review enabled"],
+    items: ["MFA direkomendasikan", "Sesi aktif 7 hari", "Tinjauan perangkat aktif"],
   },
 ];
 
 const policyRows = [
-  { label: "Low stock notifications", value: "Enabled", icon: Bell },
-  { label: "Manual payout review", value: "Required", icon: CreditCard },
-  { label: "International shipping zones", value: "3 zones", icon: Globe2 },
-  { label: "Fulfillment SLA", value: "24 hours", icon: Truck },
+  { label: "Notifikasi pesanan baru", value: "Aktif", icon: Bell },
+  { label: "Verifikasi pembayaran manual", value: "Diperlukan", icon: CreditCard },
+  { label: "Zona wilayah tersedia", value: "34 provinsi", icon: MapPinned },
+  { label: "SLA respon konsultan", value: "24 jam", icon: UserCog },
 ];
 
 export default async function SettingsPage() {
@@ -50,15 +50,15 @@ export default async function SettingsPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-2xl font-semibold tracking-tight text-neutral-950">
-              Store Settings
+              Pengaturan Platform
             </h2>
             <p className="mt-1 text-sm text-neutral-500">
-              Admin configuration for ecommerce operations, access, and policies.
+              Konfigurasi admin untuk operasional, akses, dan kebijakan platform Vowly.
             </p>
           </div>
-          <span className="inline-flex w-fit items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700">
+          <span className="inline-flex w-fit items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-sm font-semibold text-primary">
             <SlidersHorizontal className="size-4" aria-hidden="true" />
-            Admin controls
+            Kontrol admin
           </span>
         </div>
       </section>
@@ -69,7 +69,7 @@ export default async function SettingsPage() {
             key={title}
             className="rounded-xl border border-neutral-200/70 bg-white p-5 shadow-sm shadow-neutral-200/50"
           >
-            <span className="grid size-11 place-items-center rounded-xl bg-blue-50 text-blue-600">
+            <span className="grid size-11 place-items-center rounded-xl bg-secondary text-primary">
               <Icon className="size-5" aria-hidden="true" />
             </span>
             <h3 className="mt-4 font-semibold text-neutral-950">{title}</h3>
@@ -91,10 +91,10 @@ export default async function SettingsPage() {
       <div className="grid gap-4 xl:grid-cols-[1fr_380px]">
         <section className="rounded-xl border border-neutral-200/70 bg-white p-5 shadow-sm shadow-neutral-200/50">
           <h3 className="text-lg font-semibold tracking-tight text-neutral-950">
-            Operational Policies
+            Kebijakan Operasional
           </h3>
           <p className="mt-1 text-sm text-neutral-500">
-            Dummy settings that mirror admin workflows in ecommerce back offices.
+            Pengaturan dummy yang mencerminkan alur kerja admin platform wedding planner.
           </p>
           <div className="mt-5 overflow-hidden rounded-xl border border-neutral-200">
             <div className="divide-y divide-neutral-200">
@@ -119,20 +119,20 @@ export default async function SettingsPage() {
 
         <section className="rounded-xl border border-neutral-200/70 bg-white p-5 shadow-sm shadow-neutral-200/50">
           <h3 className="text-lg font-semibold tracking-tight text-neutral-950">
-            Admin Readiness
+            Kesiapan Admin
           </h3>
           <div className="mt-5 space-y-3">
             {[
-              { title: "Role groups", value: "4", icon: UsersRound },
+              { title: "Grup role", value: "4", icon: UsersRound },
               { title: "API keys", value: "2 draft", icon: KeyRound },
-              { title: "Billing docs", value: "Ready", icon: ReceiptText },
+              { title: "Dokumen billing", value: "Siap", icon: ReceiptText },
             ].map(({ title, value, icon: Icon }) => (
               <div key={title} className="flex items-center justify-between rounded-xl border border-neutral-100 bg-neutral-50/80 p-4">
                 <span className="inline-flex items-center gap-3 text-sm font-semibold text-neutral-950">
                   <Icon className="size-4 text-neutral-500" aria-hidden="true" />
                   {title}
                 </span>
-                <span className="text-sm font-semibold text-blue-700">{value}</span>
+                <span className="text-sm font-semibold text-primary">{value}</span>
               </div>
             ))}
           </div>

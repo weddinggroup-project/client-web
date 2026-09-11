@@ -30,7 +30,7 @@ export function StatCard({
             {value}
           </p>
         </div>
-        <span className="grid size-10 place-items-center rounded-xl bg-blue-50 text-blue-600">
+        <span className="grid size-10 place-items-center rounded-xl bg-secondary text-primary">
           <Icon className="size-5" aria-hidden />
         </span>
       </div>

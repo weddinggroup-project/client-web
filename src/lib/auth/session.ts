@@ -21,7 +21,7 @@ const bypassSession = {
   },
   user: {
     id: "starter-user",
-    name: "Admin Ganipedia",
+    name: "Admin Vowly",
     email: "admin@gmail.com",
     emailVerified: true,
     image: null,
