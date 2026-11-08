@@ -7,7 +7,7 @@ Path di bawah `/api/v1`. `{id}` = proyek (undangan). Dashboard terkunci (403) sa
 | Masuk / Daftar | `features/auth/*` | `POST /auth/login`, `/auth/register` (via `/api/session/*`) | Lupa password: API belum ada, UI menyatakan itu |
 | Daftar proyek `/dashboard` | `app/dashboard/page.tsx` | `GET /invitations` | 1 proyek → redirect |
 | Layout proyek | `[projectId]/layout.tsx` | `GET /invitations/{id}`, `GET /invitations/{id}/home` | 403 = belum lunas |
-| Home `/dashboard/{id}` | `home/home-view.tsx` | `GET /home` | hitung mundur, anggaran, tamu, tugas, 5 aktivitas |
+| Home `/dashboard/{id}` | `home/home-view.tsx` | `GET /home`, `GET /guests` (hitung per `rsvp_status`), `GET /checklist-items` (total dan `status=selesai`), `GET /vendors?relationship_status=terkunci` | semua angka dari API; moodboard Figma tidak ada di API |
 | Persiapan `/persiapan` | `persiapan/persiapan-view.tsx` | `/sessions` CRUD, `GET /sessions-summary`, `/emergency-contacts` CRUD, `GET /vendors` | `start/end_time` `HH:MM`; `vendor_ids` mengganti relasi |
 | Budget `/budget` | `budget/budget-view.tsx` | `/budget-items` CRUD, `GET /budget-summary` | total anggaran diatur di Profile |
 | Guest List `/tamu` | `guests/guests-view.tsx` | `/guests` CRUD, `/tables` CRUD, `GET /sessions` | meja kosong saat edit = UUID nol; `over_capacity` hanya peringatan |
@@ -17,7 +17,8 @@ Path di bawah `/api/v1`. `{id}` = proyek (undangan). Dashboard terkunci (403) sa
 | Undangan `/undangan` | `undangan/undangan-view.tsx` | `GET /templates`, `PUT /invitations/{id}` (`template_id`), `GET /guests`, `GET /deliveries`, `POST /deliveries/send`, `/collaborators` (+`/token`) | kirim butuh template; pemilik-only untuk kolaborator dan template |
 | AI Assistant `/ai-agent` | `ai/ai-view.tsx` | `/ai/conversations` (+`/messages`, `/actions/{aid}/confirm|reject`) | tindakan hanya terkirim setelah konfirmasi; simulasi |
 | Profile `/profil` | `profil/profil-view.tsx` | `PUT /invitations/{id}`, `/couple-members` CRUD, `/gift-accounts` CRUD, `POST /auth/change-password` | peran mempelai hanya dikirim saat buat |
-| Wizard `/undangan-digital/pesan` | `wizard/order-wizard.tsx` | `GET /packages`, `/templates`, `GET /invitations/subdomain-check`, `POST /invitations`, `PUT /invitations/{id}`, `POST /collaborators`, `POST /vouchers/validate`, `GET/POST /orders`, `GET /invitations/{id}/orders`, `GET /orders/{id}` | hanya `mandiri_va`; metode lain tampil nonaktif |
+| Landing harga `/` | `landing/pricing/pricing-section.tsx` | `GET /packages` (publik, server-side) | harga terendah paket aktif; tanpa API tampil "Lihat paket" |
+| Wizard `/undangan-digital/pesan` | `wizard/order-wizard.tsx` | `GET /packages`, `/templates`, `GET /invitations/subdomain-check`, `POST /invitations`, `PUT /invitations/{id}`, `POST /collaborators`, `POST /vouchers/validate`, `GET/POST /orders`, `GET /invitations/{id}/orders`, `GET /orders/{id}` | hanya `mandiri_va`; metode lain tampil nonaktif; paket/template/harga dari API |
 | Terima kolaborasi `/kolaborasi/terima` | `collaboration/accept-form.tsx` | `POST /collaborations/accept` | email akun harus sama dengan email undangan; gagal selalu 404 |
 
 ## Pemetaan akses wizard → modul API
@@ -37,3 +38,10 @@ Pemetaan ini **(asumsi)** sampai pemilik produk mengonfirmasi (PRD Q-series).
 ## Belum didukung API (sengaja tidak diimplementasikan)
 
 Alur Mitra/partner, notifikasi, lupa password, daftar berkas, verifikasi email, metode bayar selain Mandiri VA.
+
+## Catatan tampilan yang dihitung di client dari data API
+
+Kartu ringkasan Budget (persentase), grafik alokasi per kategori (`groupByCategory` dari `/budget-items`), statistik Guest List
+(`rsvpTotals` dari `/guests`, akurat hanya bila total tamu <= 100 karena `limit` maks 100), kelompok fase Checklist
+(`groupByPhase`) dan Persiapan (`groupSessions`), kelengkapan profil (`profileCompleteness`). Angka resmi (harga, total
+pesanan, ringkasan anggaran) tetap dari API.

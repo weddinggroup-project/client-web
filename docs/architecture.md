@@ -48,3 +48,15 @@ saat berpindah langkah (`advance`): buat proyek + cek subdomain → simpan lokas
 ## Konfigurasi
 
 `NEXT_PUBLIC_APP_URL` (menentukan flag Secure cookie dan metadata) dan `API_BASE_URL` (hanya server). Lihat `.env.example`.
+
+## Deploy (Jenkins) dan konfigurasi runtime
+
+- `Jenkinsfile` (cabang `main` untuk build/deploy; semua cabang menjalankan **Quality Checks**): `docker build --target checks`
+  menjalankan `pnpm lint && pnpm typecheck && pnpm test` di dalam image; gagal berarti pipeline berhenti.
+- Image produksi dibangun dengan `NEXT_PUBLIC_APP_URL` (menentukan flag Secure cookie) dan dijalankan dengan
+  `API_BASE_URL` (env runtime, hanya server) = alamat API di jaringan Docker `vowly`, default `http://vowly-api:4000`
+  **(asumsi nama container API; ubah di `environment` Jenkinsfile bila berbeda)**. Rollback ke image sebelumnya juga membawa `API_BASE_URL`.
+- Health check `GET /api/health`. `docker-compose.yml` (lokal) menjalankan client saja dan menunjuk API di host.
+- Data katalog (paket, template, harga) selalu dari API: wizard memuat `GET /packages` dan `GET /templates`; landing
+  menampilkan harga terendah dari `GET /packages`. Hanya dekorasi kartu template (warna/tagline per slug) dan penanda
+  "Terpopuler" (paket `journey`) yang statis di client.

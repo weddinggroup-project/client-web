@@ -18,6 +18,8 @@ checkout API tetapi di-ignore oleh repo API.
   invoice Virtual Account dengan polling status. `/kolaborasi/terima` untuk token undangan.
 - Di luar lingkup (API belum punya): alur Mitra/partner, lonceng notifikasi, lupa password (UI jujur menyatakannya),
   daftar berkas (`GET /files` tidak ada; berkas yang diunggah hanya dikenal selama sesi halaman).
+- Katalog (paket, template, harga) dan seluruh angka dashboard berasal dari API; tampilan mengikuti Figma "Dashboard Revisi".
+- Deploy lewat Jenkins: `Quality Checks` (lint/typecheck/test di Docker) di semua cabang; build + deploy hanya `main`; runtime butuh `API_BASE_URL` (lihat `docs/architecture.md`).
 - Pembayaran VA, WhatsApp, dan AI masih simulasi di sisi API.
 
 Jika bagian ini tampak usang terhadap kode, kodenya yang benar; perbarui bagian ini di perubahan yang sama.

@@ -18,6 +18,9 @@ pipeline {
         CONTAINER_PORT = "3303"
         HEALTH_PATH = "/api/health"
         NEXT_PUBLIC_APP_URL = "https://vowly.app"
+        // Vowly Go API as seen from this container on the shared Docker network (server-side only; the browser never
+        // calls it directly). Change here if the API container uses a different network alias or port.
+        API_BASE_URL = "http://vowly-api:4000"
 
         DOCKER_BUILDKIT = "1"
     }
@@ -36,11 +39,19 @@ pipeline {
 
     stages {
         stage('Checkout') {
-            when {
-                branch 'main'
-            }
             steps {
                 checkout scm
+            }
+        }
+
+        // Runs on every branch: lint, typecheck, and unit tests must pass before anything is built or deployed.
+        stage('Quality Checks') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    docker build --target checks --progress=plain -t "vowly-client-checks:$BUILD_NUMBER" .
+                    docker image rm -f "vowly-client-checks:$BUILD_NUMBER" >/dev/null 2>&1 || true
+                '''
             }
         }
 
@@ -68,6 +79,7 @@ Latest      : ${env.IMAGE_NAME}:latest
 Registry    : configured by Jenkins credentials
 Remote      : configured by Jenkins credentials
 Container   : ${CONTAINER_NAME}
+API         : ${API_BASE_URL}
 Network     : ${DOCKER_NETWORK}
 Alias       : ${NETWORK_ALIAS}:${CONTAINER_PORT}
 """
@@ -104,6 +116,14 @@ Alias       : ${NETWORK_ALIAS}:${CONTAINER_PORT}
                         case "$REGISTRY" in
                             http://*|https://*)
                                 echo "ERROR: docker-registry-host must not include http:// or https://." >&2
+                                exit 1
+                                ;;
+                        esac
+
+                        case "${API_BASE_URL:-}" in
+                            http://*|https://*) ;;
+                            *)
+                                echo "ERROR: API_BASE_URL must start with http:// or https://." >&2
                                 exit 1
                                 ;;
                         esac
@@ -276,6 +296,7 @@ docker_cmd run -d \
     --network "$DOCKER_NETWORK" \
     --network-alias "$NETWORK_ALIAS" \
     --expose "$CONTAINER_PORT" \
+    -e API_BASE_URL="$API_BASE_URL" \
     "$IMAGE_FULL"
 
 echo "Waiting for application health..."
@@ -304,6 +325,7 @@ if [ -n "$PREVIOUS_IMAGE" ]; then
         --network "$DOCKER_NETWORK" \
         --network-alias "$NETWORK_ALIAS" \
         --expose "$CONTAINER_PORT" \
+        -e API_BASE_URL="$API_BASE_URL" \
         "$PREVIOUS_IMAGE" || true
 fi
 
@@ -320,6 +342,7 @@ REMOTE_SCRIPT
                             DOCKER_NETWORK='$DOCKER_NETWORK' \
                             NETWORK_ALIAS='$NETWORK_ALIAS' \
                             CONTAINER_PORT='$CONTAINER_PORT' \
+                            API_BASE_URL='$API_BASE_URL' \
                             HEALTH_PATH='$HEALTH_PATH' \
                             REMOTE_SECRET_DIR='$REMOTE_SECRET_DIR' \
                             DOCKER_PASS_FILE='$REMOTE_SECRET_DIR/docker.pass' \

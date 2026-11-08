@@ -18,6 +18,13 @@ COPY package.json pnpm-lock.yaml .npmrc ./
 RUN --mount=type=cache,id=vowly-pnpm-store,target=/pnpm/store \
     pnpm install --frozen-lockfile
 
+# Quality gate used by Jenkins (`docker build --target checks`): fails the build on lint, type, or test errors.
+FROM base AS checks
+
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY . .
+RUN pnpm lint && pnpm typecheck && pnpm test
+
 # Build the standalone Next.js server.
 FROM base AS builder
 
