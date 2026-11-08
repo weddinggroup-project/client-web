@@ -13,9 +13,6 @@
 /playwright-report
 /test-results
 
-# Local documentation drafts
-docs/
-
 # Local environment files
 .env*
 !.env.example

@@ -6,7 +6,8 @@ hingga tamu undangan, semua dalam satu tempat.
 
 Repository ini adalah **frontend client** Vowly: landing page, pusat bantuan,
 halaman produk "Undangan Digital" beserta wizard pemesanannya, alur
-autentikasi (login/daftar/lupa password), dan admin dashboard internal.
+autentikasi, dan dashboard Wedding Planner (Home, Persiapan, Budget, Guest List,
+Checklist, Dokumen, Vendor, Undangan, AI Assistant, Profile) yang memakai Vowly API.
 
 ## Stack
 
@@ -14,7 +15,7 @@ autentikasi (login/daftar/lupa password), dan admin dashboard internal.
 - TypeScript strict
 - Tailwind CSS 4 dengan design token custom (lihat `src/app/globals.css`)
 - Server Components sebagai default
-- Better Auth email/password-ready dengan dummy admin starter
+- Autentikasi lewat Vowly API (JWT di cookie httpOnly, pola BFF; lihat `docs/architecture.md`)
 - Routing satu bahasa tanpa locale prefix
 - Typed API client dan standard API response
 - Zod validation dan normalized errors
@@ -29,9 +30,11 @@ autentikasi (login/daftar/lupa password), dan admin dashboard internal.
 
 ```bash
 pnpm install
-cp .env.example .env.local
+cp .env.example .env.local   # isi API_BASE_URL (default http://localhost:4000)
 pnpm dev
 ```
+
+Butuh Vowly API berjalan di `API_BASE_URL`. Panduan kontributor dan batasan AI ada di `CLAUDE.md`.
 
 Buka:
 
@@ -64,8 +67,9 @@ src/
 │   ├── sign-in/               # Login
 │   ├── sign-up/               # Daftar akun
 │   ├── forgot-password/       # Lupa password
-│   ├── dashboard/             # Admin dashboard (protected)
-│   ├── api/                   # Auth dan health
+│   ├── dashboard/             # Dashboard Wedding Planner per proyek (protected)
+│   ├── kolaborasi/terima/     # Terima undangan kolaborasi
+│   ├── api/                   # BFF: session/*, backend/[...path], health
 │   └── layout.tsx
 ├── components/
 │   ├── landing/                # Section landing page (navbar, hero, footer, dst.)
@@ -73,12 +77,13 @@ src/
 ├── config/                     # Typed configuration dan constants
 ├── features/                   # Business/domain modules
 │   ├── auth/                   # Form login, daftar, lupa password
+│   ├── dashboard/              # Shell, CrudTable, modul Home..Profile
+│   ├── collaboration/          # Form terima undangan kolaborasi
 │   ├── help-center/             # Pusat bantuan
 │   ├── undangan-digital/       # Halaman produk + wizard pemesanan
-│   ├── orders/, products/, profile/  # Modul admin dashboard
 ├── lib/
-│   ├── api/                    # API client dan response helpers
-│   ├── auth/                   # Better Auth dan session helpers
+│   ├── api/                    # Helper respons route handler
+│   ├── vowly/                  # Client/server API Vowly, tipe, format, proxy
 │   ├── errors/
 │   ├── helpers/
 │   ├── logger/
@@ -89,12 +94,11 @@ src/
 
 ## Environment
 
-Variabel wajib untuk menjalankan auth (lihat `.env.example` untuk daftar lengkap):
+Lihat `.env.example`:
 
 ```dotenv
 NEXT_PUBLIC_APP_URL=http://localhost:3303
-BETTER_AUTH_SECRET=
-BETTER_AUTH_URL=http://localhost:3303
+API_BASE_URL=http://localhost:4000   # Vowly API, hanya dibaca server
 ```
 
 ## Pemeriksaan project
