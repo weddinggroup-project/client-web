@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HiArrowLeft } from "react-icons/hi2";
+import { StandaloneLogout } from "@/components/dash/standalone-topbar";
 import { cn } from "@/lib/utils";
 
 type WizardTopBarProps = {
@@ -36,7 +37,7 @@ export function WizardTopBar({ onBack, className }: WizardTopBarProps) {
         </Link>
       </div>
 
-      <span className="text-xs font-medium text-muted-foreground">Panduan</span>
+      <StandaloneLogout />
     </div>
   );
 }

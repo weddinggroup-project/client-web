@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { btn } from "@/components/dash/primitives";
+import { StandaloneTopbar } from "@/components/dash/standalone-topbar";
 import { apiServer, requireSession } from "@/lib/vowly/server";
 import { formatDate } from "@/lib/vowly/format";
 import type { Invitation } from "@/lib/vowly/types";
@@ -18,7 +19,9 @@ export default async function DashboardIndex() {
   if (projects.length === 1 && projects[0]) redirect(`/dashboard/${projects[0].id}`);
 
   return (
-    <main className="mx-auto min-h-screen max-w-3xl bg-cream px-4 py-12 font-dash text-ink">
+    <div className="min-h-screen bg-cream font-dash text-ink">
+    <StandaloneTopbar name={user.name} isAdmin={user.role === "admin"} />
+    <main className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="font-serif text-3xl font-semibold text-accent">Halo, {user.name}</h1>
       <p className="mt-1 text-sm text-ink-soft">Pilih proyek pernikahan yang ingin dikelola.</p>
 
@@ -49,5 +52,6 @@ export default async function DashboardIndex() {
         </ul>
       )}
     </main>
+    </div>
   );
 }

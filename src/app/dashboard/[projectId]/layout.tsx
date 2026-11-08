@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { DashboardShell } from "@/features/dashboard/dashboard-shell";
 import { ProjectProvider } from "@/features/dashboard/project-context";
 import { btn } from "@/components/dash/primitives";
+import { StandaloneTopbar } from "@/components/dash/standalone-topbar";
 import { apiServer, requireSession } from "@/lib/vowly/server";
 import type { Home, Invitation } from "@/lib/vowly/types";
 
@@ -23,7 +24,9 @@ export default async function ProjectLayout({ children, params }: { children: Re
   const home = await apiServer<Home>(`/invitations/${projectId}/home`);
   if (!home.ok && home.status === 403) {
     return (
-      <main className="grid min-h-screen place-items-center bg-cream px-4 font-dash text-ink">
+      <div className="min-h-screen bg-cream font-dash text-ink">
+      <StandaloneTopbar name={user.name} isAdmin={user.role === "admin"} />
+      <main className="grid min-h-[calc(100vh-3.5rem)] place-items-center px-4">
         <div className="max-w-md rounded-2xl border border-gold/50 bg-white p-8 text-center shadow-sm">
           <h1 className="font-serif text-2xl font-semibold text-accent">Dashboard belum dibuka</h1>
           <p className="mt-3 text-sm text-ink-soft">
@@ -39,6 +42,7 @@ export default async function ProjectLayout({ children, params }: { children: Re
           </div>
         </div>
       </main>
+      </div>
     );
   }
   if (!home.ok) throw new Error(home.message);
