@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { WizardTopBar } from "./wizard-top-bar";
-import { invitationTemplates, packages, formatRupiah } from "./wizard-data";
+import type { Package, Template } from "@/lib/vowly/types";
+import { defaultTemplateStyle, formatRupiah, templateStyles } from "./wizard-data";
 
 type StepTemplateProps = {
-  packageId: string;
+  selectedPackage: Package | undefined;
+  templates: Template[];
   selectedTemplateId: string | null;
   onSelectTemplate: (templateId: string) => void;
   onBack: () => void;
@@ -14,14 +16,13 @@ type StepTemplateProps = {
 };
 
 export function StepTemplate({
-  packageId,
+  selectedPackage,
+  templates,
   selectedTemplateId,
   onSelectTemplate,
   onBack,
   onNext,
 }: StepTemplateProps) {
-  const selectedPackage = packages.find((pkg) => pkg.id === packageId) ?? packages[0]!;
-
   return (
     <div className="min-h-screen bg-background pb-28">
       <WizardTopBar onBack={onBack} />
@@ -34,14 +35,14 @@ export function StepTemplate({
         <Card className="mt-6 rounded-2xl border-card-border p-6 shadow-sm shadow-black/5">
           <div className="flex items-center justify-between">
             <span className="font-serif text-lg font-semibold text-foreground">
-              {selectedPackage.name}
+              {selectedPackage?.name ?? "-"}
             </span>
             <span className="font-semibold text-primary">
-              {formatRupiah(selectedPackage.price)}
+              {formatRupiah(selectedPackage?.price ?? 0)}
             </span>
           </div>
           <ul className="mt-4 grid gap-2 text-sm text-foreground/80 sm:grid-cols-2">
-            {selectedPackage.features.map((feature) => (
+            {(selectedPackage?.features ?? []).map((feature) => (
               <li key={feature} className="flex items-center gap-2">
                 <HiCheckCircle className="size-4 shrink-0 text-success" aria-hidden="true" />
                 {feature}
@@ -61,14 +62,15 @@ export function StepTemplate({
         </div>
 
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
-          {invitationTemplates.map((template) => {
-            const isSelected = template.id === selectedTemplateId;
+          {templates.map((apiTemplate) => {
+            const template = { ...apiTemplate, ...(templateStyles[apiTemplate.slug] ?? defaultTemplateStyle) };
+            const isSelected = template.slug === selectedTemplateId;
 
             return (
               <button
-                key={template.id}
+                key={template.slug}
                 type="button"
-                onClick={() => onSelectTemplate(template.id)}
+                onClick={() => onSelectTemplate(template.slug)}
                 className={cn(
                   "flex flex-col items-center rounded-2xl border border-card-border bg-card p-4 text-center shadow-sm shadow-black/5 transition duration-300 hover:-translate-y-1 hover:shadow-lg",
                   isSelected && "border-primary ring-2 ring-primary/30",
@@ -118,7 +120,7 @@ export function StepTemplate({
           <div>
             <p className="text-xs text-muted-foreground">Total</p>
             <p className="text-lg font-bold text-primary">
-              {formatRupiah(selectedPackage.price)}
+              {formatRupiah(selectedPackage?.price ?? 0)}
             </p>
           </div>
           <Button

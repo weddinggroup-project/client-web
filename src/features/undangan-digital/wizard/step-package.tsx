@@ -3,15 +3,18 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { WizardTopBar } from "./wizard-top-bar";
-import { packages, formatRupiah } from "./wizard-data";
+import type { Package } from "@/lib/vowly/types";
+import { POPULAR_PACKAGE_CODE, formatRupiah } from "./wizard-data";
 
 type StepPackageProps = {
+  packages: Package[];
   selectedPackageId: string | null;
   onSelectPackage: (packageId: string) => void;
   onNext: () => void;
 };
 
 export function StepPackage({
+  packages,
   selectedPackageId,
   onSelectPackage,
   onNext,
@@ -27,7 +30,7 @@ export function StepPackage({
 
         <div className="mt-10 grid gap-6 sm:grid-cols-3">
           {packages.map((pkg) => {
-            const isSelected = pkg.id === selectedPackageId;
+            const isSelected = pkg.code === selectedPackageId;
 
             return (
               <Card
@@ -37,7 +40,7 @@ export function StepPackage({
                   isSelected && "border-primary ring-2 ring-primary/30",
                 )}
               >
-                {pkg.isPopular && (
+                {pkg.code === POPULAR_PACKAGE_CODE && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-[10px] font-semibold tracking-wide text-primary-foreground uppercase">
                     Terpopuler
                   </span>
@@ -66,7 +69,7 @@ export function StepPackage({
                   type="button"
                   variant={isSelected ? "rose" : "outline"}
                   className="mt-6 h-10 w-full rounded-full"
-                  onClick={() => onSelectPackage(pkg.id)}
+                  onClick={() => onSelectPackage(pkg.code)}
                 >
                   {isSelected ? "Dipilih" : "Lihat Detail"}
                 </Button>

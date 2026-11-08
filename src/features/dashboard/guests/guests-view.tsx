@@ -1,14 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Badge, DashHeader, SectionTitle, type Tone } from "@/components/dash/primitives";
+import Link from "next/link";
+import { Badge, DashHeader, SectionTitle, StatCard, btn, type Tone } from "@/components/dash/primitives";
 import type { FieldDef, FormValues } from "@/components/dash/form-modal";
 import { useResource } from "@/components/dash/use-resource";
-import { Panel } from "@/components/dash/primitives";
-import type { EventSession, Guest, RsvpStatus, SeatingTable } from "@/lib/vowly/types";
+import { cn } from "@/lib/utils";
+import { initials } from "@/lib/vowly/format";
+import type { Delivery, DeliveryStatus, EventSession, Guest, RsvpStatus, SeatingTable } from "@/lib/vowly/types";
 import { CrudTable } from "../crud/crud-table";
 import { initialText, integer, optionalText, text } from "../crud/payload";
-import { useProjectApi } from "../project-context";
+import { projectHref } from "../nav";
+import { useProject, useProjectApi } from "../project-context";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
@@ -17,6 +20,25 @@ const rsvp: Record<RsvpStatus, { label: string; tone: Tone }> = {
   hadir: { label: "Hadir", tone: "success" },
   tidak_hadir: { label: "Tidak hadir", tone: "danger" },
 };
+const deliveryText: Record<DeliveryStatus, { label: string; tone: Tone }> = {
+  belum_dikirim: { label: "Belum dikirim", tone: "neutral" },
+  mengirim: { label: "Mengirim", tone: "warning" },
+  terkirim: { label: "Terkirim", tone: "success" },
+  gagal: { label: "Gagal", tone: "danger" },
+};
+
+/** Guest entries and pax per RSVP status. Exact only while the list fits one page (the API caps `limit` at 100). */
+export function rsvpTotals(guests: Pick<Guest, "rsvp_status" | "pax">[]) {
+  const totals = { all: { count: 0, pax: 0 }, hadir: { count: 0, pax: 0 }, belum_respons: { count: 0, pax: 0 }, tidak_hadir: { count: 0, pax: 0 } };
+  for (const guest of guests) {
+    totals.all.count += 1;
+    totals.all.pax += guest.pax;
+    totals[guest.rsvp_status].count += 1;
+    totals[guest.rsvp_status].pax += guest.pax;
+  }
+  return totals;
+}
+
 const rsvpOptions = Object.entries(rsvp).map(([value, { label }]) => ({ value, label }));
 
 function TablesPanel({ onChanged, tables }: { onChanged: () => void; tables: SeatingTable[] }) {
@@ -56,6 +78,21 @@ export function GuestsView() {
   const tables = useMemo(() => tablesRes.data ?? [], [tablesRes.data]);
   const sessions = useMemo(() => sessionsRes.data ?? [], [sessionsRes.data]);
   const tableName = (id: string | null) => tables.find((table) => table.id === id)?.name ?? "-";
+  const { project } = useProject();
+  const [category, setCategory] = useState("");
+  const everyone = useResource<Guest[]>(path("/guests"), { limit: 100, _r: tick || undefined });
+  const deliveries = useResource<Delivery[]>(path("/deliveries"), { limit: 100, _r: tick || undefined });
+  const deliveryOf = useMemo(() => new Map((deliveries.data ?? []).map((item) => [item.guest_id, item.status])), [deliveries.data]);
+  const sessionName = (id: string) => sessions.find((session) => session.id === id)?.name ?? "";
+  const all = useMemo(() => everyone.data ?? [], [everyone.data]);
+  const complete = (everyone.meta?.total ?? 0) <= all.length;
+  const totals = useMemo(() => rsvpTotals(all), [all]);
+  const categories = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const guest of all) if (guest.category) counts.set(guest.category, (counts.get(guest.category) ?? 0) + 1);
+    return [...counts.entries()];
+  }, [all]);
+  const pct = (part: number) => (totals.all.pax > 0 ? Math.round((part / totals.all.pax) * 100) : 0);
 
   const fields: FieldDef[] = [
     { kind: "text", name: "full_name", label: "Nama lengkap", required: true, maxLength: 150 },
@@ -71,24 +108,64 @@ export function GuestsView() {
 
   return (
     <>
-      <DashHeader eyebrow="Guest List" title="Tamu & RSVP" description="Kelola daftar tamu, meja, dan status kehadiran. Pengiriman undangan ada di menu Undangan." />
-      <TablesPanel tables={tables} onChanged={() => setTick((value) => value + 1)} />
-      <Panel className="mb-4 p-0 sm:p-0 border-0 shadow-none bg-transparent">
-        <SectionTitle eyebrow="Tamu" title="Daftar tamu" />
-      </Panel>
+      <DashHeader
+        title="Guest List & RSVP Tamu Undangan"
+        description="Kelola alokasi meja, sesi kehadiran, broadcast undangan WhatsApp, serta monitor status konfirmasi RSVP secara real-time."
+        actions={
+          <Link href={projectHref(project.id, "undangan")} className={btn.secondary}>
+            Kirim WA Blast
+          </Link>
+        }
+      />
+      {everyone.data ? (
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Total Tamu Terdaftar" value={complete ? `${totals.all.pax} Pax` : `${everyone.meta?.total ?? 0} Undangan`} hint={`${totals.all.count} undangan terdaftar`} />
+          <StatCard label="Konfirmasi Hadir" value={complete ? `${totals.hadir.pax} Pax` : "-"} tone="success" hint={complete ? `${pct(totals.hadir.pax)}% dari total` : "Daftar lebih dari 100 tamu"} />
+          <StatCard label="Belum Respon / Menunggu" value={complete ? `${totals.belum_respons.pax} Pax` : "-"} hint={complete ? `${pct(totals.belum_respons.pax)}% dari total` : undefined} />
+          <StatCard label="Berhalangan Hadir" value={complete ? `${totals.tidak_hadir.pax} Pax` : "-"} tone="danger" hint={complete ? `${pct(totals.tidak_hadir.pax)}% dari total` : undefined} />
+        </div>
+      ) : null}
+      <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filter kategori tamu">
+        {[["", `Semua Tamu (${everyone.meta?.total ?? 0})`] as const, ...categories.map(([name, count]) => [name, `${name} (${count})`] as const)].map(([value, text]) => (
+          <button
+            key={value || "all"}
+            type="button"
+            aria-pressed={category === value}
+            onClick={() => setCategory(value)}
+            className={cn("rounded-full border px-4 py-1.5 text-sm font-medium transition", category === value ? "border-primary bg-primary text-primary-foreground" : "border-gold/60 bg-white hover:bg-cream")}
+          >
+            {text}
+          </button>
+        ))}
+      </div>
       <CrudTable<Guest>
+        key={category}
         resource="/guests"
         noun="tamu"
         searchable
         refreshKey={tick}
-        filters={[{ name: "rsvp_status", label: "Semua RSVP", options: rsvpOptions }, { name: "table_id", label: "Semua meja", options: tables.map((table) => ({ value: table.id, label: table.name })) }]}
+        onChanged={() => setTick((value) => value + 1)}
+        fixedQuery={category ? { category } : undefined}
+        filters={[{ name: "rsvp_status", label: "Semua Status RSVP", options: rsvpOptions }, { name: "table_id", label: "Semua meja", options: tables.map((table) => ({ value: table.id, label: table.name })) }]}
         columns={[
-          { header: "Nama", cell: (row) => <><span className="font-medium">{row.full_name}</span>{row.display_name !== row.full_name ? <span className="block text-xs text-ink-soft">{row.display_name}</span> : null}</> },
-          { header: "Kategori", cell: (row) => row.category || "-" },
-          { header: "WhatsApp", cell: (row) => row.phone || "-" },
-          { header: "Pax", cell: (row) => row.pax },
-          { header: "Meja", cell: (row) => tableName(row.table_id) },
-          { header: "RSVP", cell: (row) => <Badge tone={rsvp[row.rsvp_status].tone}>{rsvp[row.rsvp_status].label}</Badge> },
+          {
+            header: "Nama Tamu & Kategori",
+            cell: (row) => (
+              <span className="flex items-center gap-3">
+                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gold/50 text-xs font-semibold text-gold-foreground">{initials(row.full_name)}</span>
+                <span className="min-w-0">
+                  <span className="block truncate font-medium">{row.full_name}</span>
+                  <span className="block truncate text-xs text-ink-soft">{row.category || "Tanpa kategori"}{row.display_name !== row.full_name ? ` • ${row.display_name}` : ""}</span>
+                </span>
+              </span>
+            ),
+          },
+          { header: "Nomor WhatsApp", cell: (row) => row.phone || "-" },
+          { header: "Sesi Acara", cell: (row) => row.session_ids.map(sessionName).filter(Boolean).join(", ") || "-" },
+          { header: "Alokasi Meja", cell: (row) => tableName(row.table_id) },
+          { header: "Pax", cell: (row) => `+${row.pax}` },
+          { header: "Status RSVP", cell: (row) => <Badge tone={rsvp[row.rsvp_status].tone}>{rsvp[row.rsvp_status].label}</Badge> },
+          { header: "Status WA Blast", cell: (row) => { const status = deliveryText[deliveryOf.get(row.id) ?? "belum_dikirim"]; return <Badge tone={status.tone}>{status.label}</Badge>; } },
         ]}
         fields={fields}
         toInitial={(row): FormValues => ({
@@ -117,6 +194,9 @@ export function GuestsView() {
           };
         }}
       />
+      <div className="mt-8">
+  <TablesPanel tables={tables} onChanged={() => setTick((value) => value + 1)} />
+      </div>
     </>
   );
 }

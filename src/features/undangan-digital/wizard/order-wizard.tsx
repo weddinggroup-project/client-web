@@ -237,8 +237,6 @@ export function OrderWizard({ resumeProjectId }: { resumeProjectId?: string }) {
     </div>
   ) : null;
 
-  const staticId = packageCode ?? "promise";
-
   return (
     <div aria-busy={busy}>
       {banner}
@@ -249,7 +247,7 @@ export function OrderWizard({ resumeProjectId }: { resumeProjectId?: string }) {
   function renderStep() {
     switch (currentStep) {
       case "package":
-        return <StepPackage selectedPackageId={packageCode} onSelectPackage={setPackageCode} onNext={projectId ? () => goToStep("invitation") : goNext} />;
+        return <StepPackage packages={packages} selectedPackageId={packageCode} onSelectPackage={setPackageCode} onNext={projectId ? () => goToStep("invitation") : goNext} />;
 
       case "invitation":
         return <StepInvitationDetails details={invitationDetails} onChange={setInvitationDetails} onBack={goBack} onNext={() => void advance(saveInvitation)} />;
@@ -261,12 +259,12 @@ export function OrderWizard({ resumeProjectId }: { resumeProjectId?: string }) {
         return <StepCollaboration collaborators={collaborators} onInvite={invite} onBack={goBack} onNext={goNext} />;
 
       case "template":
-        return <StepTemplate packageId={staticId} selectedTemplateId={templateSlug} onSelectTemplate={setTemplateSlug} onBack={goBack} onNext={() => void advance(saveTemplate)} />;
+        return <StepTemplate selectedPackage={apiPackage} templates={templates} selectedTemplateId={templateSlug} onSelectTemplate={setTemplateSlug} onBack={goBack} onNext={() => void advance(saveTemplate)} />;
 
       case "summary":
         return (
           <StepSummary
-            packageName={apiPackage?.name ?? staticId}
+            packageName={apiPackage?.name ?? "-"}
             packagePrice={apiPackage?.price ?? 0}
             codes={codes}
             selectedPaymentMethod={paymentMethod}

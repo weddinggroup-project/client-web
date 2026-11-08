@@ -6,7 +6,8 @@ import { HiOutlineKey, HiOutlineNoSymbol, HiOutlinePaperAirplane } from "react-i
 import { useFeedback } from "@/components/dash/feedback";
 import { FormModal, type FieldDef, type FormValues } from "@/components/dash/form-modal";
 import { Modal } from "@/components/dash/modal";
-import { Badge, DashHeader, Panel, SectionTitle, btn, type Tone } from "@/components/dash/primitives";
+import { Badge, DashHeader, Panel, SectionTitle, StatCard, btn, type Tone } from "@/components/dash/primitives";
+import { defaultTemplateStyle, templateStyles } from "@/features/undangan-digital/wizard/wizard-data";
 import { EmptyState, ErrorState, LoadingBlock } from "@/components/dash/states";
 import { useResource } from "@/components/dash/use-resource";
 import { api, ApiError } from "@/lib/vowly/client";
@@ -65,9 +66,10 @@ function TemplatePicker() {
       ) : templates.error ? (
         <ErrorState error={templates.error} onRetry={templates.reload} />
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-3">
+        <ul className="grid gap-4 sm:grid-cols-3">
           {(templates.data ?? []).map((template) => {
             const selected = project.template_id === template.id;
+            const style = templateStyles[template.slug] ?? defaultTemplateStyle;
             return (
               <li key={template.id}>
                 <button
@@ -75,10 +77,20 @@ function TemplatePicker() {
                   disabled={!project.is_owner || saving !== undefined}
                   aria-pressed={selected}
                   onClick={() => void choose(template)}
-                  className={cn("w-full rounded-xl border p-4 text-left transition disabled:opacity-60", selected ? "border-gold-foreground bg-blush/40" : "border-gold/50 hover:bg-cream")}
+                  className={cn("w-full rounded-2xl border p-3 text-left transition disabled:opacity-60", selected ? "border-gold-foreground bg-blush/30 ring-2 ring-gold-foreground/30" : "border-gold/50 hover:bg-cream")}
                 >
-                  <span className="block font-semibold">{template.name}</span>
-                  <span className="mt-1 block text-xs text-ink-soft">{selected ? "Template aktif" : saving === template.id ? "Menyimpan…" : "Pilih template ini"}</span>
+                  <span
+                    className="relative flex aspect-[4/3] w-full items-center justify-center rounded-xl border"
+                    style={{ background: style.colors[0], borderColor: style.colors[1] }}
+                  >
+                    <span className="font-serif text-lg font-semibold" style={{ color: style.colors[1] }}>
+                      {project.title}
+                    </span>
+                    {selected ? <span className="absolute left-2 top-2 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-semibold text-white">Digunakan saat ini</span> : null}
+                  </span>
+                  <span className="mt-3 block font-semibold">{template.name}</span>
+                  <span className="block text-xs text-ink-soft">{style.tagline}</span>
+                  <span className="mt-2 block text-xs font-semibold text-primary">{selected ? "Template aktif" : saving === template.id ? "Menyimpan…" : "Terapkan"}</span>
                 </button>
               </li>
             );
@@ -305,10 +317,31 @@ function Collaborators() {
   );
 }
 
+function Overview() {
+  const path = useProjectApi();
+  const { project } = useProject();
+  const guests = useResource<Guest[]>(path("/guests"), { limit: 100 });
+  const deliveries = useResource<Delivery[]>(path("/deliveries"), { limit: 100 });
+  const total = guests.meta?.total ?? 0;
+  const sent = (deliveries.data ?? []).filter((item) => item.status === "terkirim").length;
+  const attending = (guests.data ?? []).filter((guest) => guest.rsvp_status === "hadir");
+  const pax = attending.reduce((sum, guest) => sum + guest.pax, 0);
+  const pending = (guests.data ?? []).filter((guest) => guest.rsvp_status === "belum_respons").length;
+  const declined = (guests.data ?? []).filter((guest) => guest.rsvp_status === "tidak_hadir").length;
+  return (
+    <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <StatCard label="Web Undangan" value={project.title} hint={project.template_id ? `${project.subdomain}.vowly.id` : "Belum memilih template"} />
+      <StatCard label="Progres Broadcast" value={`${sent} / ${total}`} hint={total > 0 ? `${Math.round((sent / total) * 100)}% undangan terkirim` : "Belum ada tamu"} />
+      <StatCard label="Total Konfirmasi RSVP" value={`${attending.length} Hadir`} hint={`${pax} pax • ${pending} menunggu • ${declined} berhalangan`} />
+    </div>
+  );
+}
+
 export function UndanganView() {
   return (
     <>
-      <DashHeader eyebrow="Undangan" title="Template & Status Kirim" description="Pilih template, kirim undangan lewat WhatsApp, dan kelola kolaborator." />
+      <DashHeader title="Undangan Digital & Status Pengiriman" description="Kelola template website undangan, kirim broadcast WhatsApp, dan pantau status pengiriman serta RSVP langsung dari satu dasbor." />
+      <Overview />
       <TemplatePicker />
       <Deliveries />
       <Collaborators />

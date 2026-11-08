@@ -8,9 +8,10 @@ import { EmptyState, ErrorState, LoadingBlock } from "@/components/dash/states";
 import { useResource } from "@/components/dash/use-resource";
 import { api, ApiError } from "@/lib/vowly/client";
 import { cn } from "@/lib/utils";
-import { formatDate } from "@/lib/vowly/format";
-import type { ChatAction, ChatActionStatus, ChatMessage, Conversation, ConversationDetail } from "@/lib/vowly/types";
-import { useProjectApi } from "../project-context";
+import { formatDate, formatRupiah } from "@/lib/vowly/format";
+import type { BudgetSummary, ChatAction, ChatActionStatus, ChatMessage, Conversation, ConversationDetail } from "@/lib/vowly/types";
+import { ProgressBar } from "@/components/dash/primitives";
+import { useProject, useProjectApi } from "../project-context";
 
 const actionStatus: Record<ChatActionStatus, { label: string; tone: Tone }> = {
   proposed: { label: "Menunggu konfirmasi", tone: "warning" },
@@ -55,6 +56,52 @@ function ActionCard({ action, onConfirm, onReject, busy }: { action: ChatAction;
         <p className="mt-1 text-xs text-ink-soft">{action.draft}</p>
       )}
     </div>
+  );
+}
+
+/** Quick prompts that fill the message box; the user still reviews and sends them. */
+const suggestions = ["Hitung kebutuhan souvenir", "Buat draf rundown 30 menit", "Cari efisiensi anggaran 10%", "Tulis sambutan keluarga"];
+
+function ContextPanel() {
+  const { project, daysUntil } = useProject();
+  const path = useProjectApi();
+  const budget = useResource<BudgetSummary>(path("/budget-summary"));
+  const rows: [string, string][] = [
+    ["Mempelai", project.title],
+    ["Tanggal Acara", formatDate(project.event_date)],
+    ["Venue", [project.venue, project.city].filter(Boolean).join(", ") || "-"],
+    ["Target Tamu", project.guest_count ? `${project.guest_count} Undangan` : "-"],
+  ];
+  return (
+    <Panel className="h-fit">
+      <div className="flex items-center justify-between">
+        <h2 className="font-serif text-lg font-semibold">Konteks Pernikahan</h2>
+        {daysUntil !== null && daysUntil > 0 ? <Badge tone="gold">H-{daysUntil} Hari</Badge> : null}
+      </div>
+      <dl className="mt-4 space-y-3 text-sm">
+        {rows.map(([label, value]) => (
+          <div key={label} className="flex justify-between gap-3 border-b border-gold/30 pb-2">
+            <dt className="text-xs text-ink-soft">{label}</dt>
+            <dd className="text-right font-medium">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      {budget.data ? (
+        <div className="mt-4">
+          <div className="flex items-center justify-between text-xs text-ink-soft">
+            <span>Alokasi Anggaran Total</span>
+            <strong className="text-ink">{formatRupiah(budget.data.total_budget)}</strong>
+          </div>
+          <div className="mt-2">
+            <ProgressBar value={budget.data.actual_total} max={Math.max(budget.data.total_budget, 1)} tone={budget.data.over_budget ? "danger" : "primary"} />
+          </div>
+          <p className="mt-1 text-xs text-ink-soft">
+            Terpakai {formatRupiah(budget.data.actual_total)} • Sisa {formatRupiah(budget.data.remaining)}
+          </p>
+        </div>
+      ) : null}
+      <p className="mt-4 text-[11px] leading-4 text-ink-soft">Asisten hanya menerima ringkasan proyek dan nama vendor. Data tamu, keluarga, dan rekening tidak dikirim.</p>
+    </Panel>
   );
 }
 
@@ -145,7 +192,14 @@ function Chat({ conversationId, onDeleted }: { conversationId: string; onDeleted
         ))}
         <div ref={bottom} />
       </div>
-      <form onSubmit={send} className="flex gap-2 border-t border-gold/40 pt-3">
+      <div className="flex flex-wrap gap-2 border-t border-gold/40 pt-3">
+        {suggestions.map((suggestion) => (
+          <button key={suggestion} type="button" onClick={() => setText(suggestion)} className="rounded-full border border-gold/60 bg-cream px-3 py-1 text-xs hover:bg-gold/30">
+            {suggestion}
+          </button>
+        ))}
+      </div>
+      <form onSubmit={send} className="flex gap-2 pt-3">
         <input
           value={text}
           onChange={(event) => setText(event.target.value)}
@@ -184,7 +238,7 @@ export function AiView() {
   return (
     <>
       <DashHeader eyebrow="Assistant" title="Konsultasi & Ide Konsep" description="Asisten hanya menyarankan. Pesan ke vendor baru dikirim setelah Anda mengonfirmasi. Ini masih mode simulasi." />
-      <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[240px_1fr] xl:grid-cols-[240px_1fr_300px]">
         <Panel className="p-3 sm:p-3">
           <button type="button" className={`${btn.primary} mb-3 w-full`} onClick={() => void create()}>
             <HiOutlinePlus className="size-4" aria-hidden />
@@ -226,6 +280,7 @@ export function AiView() {
             <EmptyState title="Belum ada percakapan" description="Buat percakapan baru untuk mulai berkonsultasi." />
           )}
         </Panel>
+        <ContextPanel />
       </div>
     </>
   );

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { DashHeader, Badge, Panel, ProgressBar, StatCard, type Tone } from "@/components/dash/primitives";
+import { useMemo, useState } from "react";
+import { DashHeader, Badge, Panel, SectionTitle, StatCard, type Tone } from "@/components/dash/primitives";
 import { ErrorState, LoadingBlock } from "@/components/dash/states";
 import { useResource } from "@/components/dash/use-resource";
 import type { FieldDef, FormValues } from "@/components/dash/form-modal";
@@ -29,35 +29,100 @@ const fields: FieldDef[] = [
   { kind: "textarea", name: "notes", label: "Catatan", maxLength: 1000, span: 2 },
 ];
 
+/** Estimated vs actual amount per budget category, largest estimate first. */
+export function groupByCategory(items: Pick<BudgetItem, "category" | "estimated_amount" | "actual_amount">[]) {
+  const map = new Map<string, { category: string; estimated: number; actual: number }>();
+  for (const item of items) {
+    const key = item.category || "Lainnya";
+    const row = map.get(key) ?? { category: key, estimated: 0, actual: 0 };
+    row.estimated += item.estimated_amount;
+    row.actual += item.actual_amount;
+    map.set(key, row);
+  }
+  return [...map.values()].sort((a, b) => b.estimated - a.estimated);
+}
+
+function AllocationChart({ items }: { items: BudgetItem[] }) {
+  const rows = useMemo(() => groupByCategory(items), [items]);
+  const max = Math.max(1, ...rows.map((row) => Math.max(row.estimated, row.actual)));
+  return (
+    <Panel>
+      <SectionTitle
+        title="Alokasi Budget vs Realisasi Pengeluaran"
+        aside={
+          <p className="flex gap-3 text-[11px] text-ink-soft">
+            <span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-gold" /> Alokasi Anggaran</span>
+            <span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-primary" /> Realisasi Terpakai</span>
+          </p>
+        }
+      />
+      {rows.length === 0 ? (
+        <p className="text-sm text-ink-soft">Belum ada pos anggaran. Tambahkan pos untuk melihat perbandingannya.</p>
+      ) : (
+        <ul className="space-y-4">
+          {rows.map((row) => (
+            <li key={row.category}>
+              <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2 text-sm">
+                <span className="font-medium">{row.category}</span>
+                <span className="text-xs text-ink-soft">
+                  {formatRupiah(row.actual)} / {formatRupiah(row.estimated)}
+                </span>
+              </div>
+              <div className="relative h-3 overflow-hidden rounded-full bg-gold/30" role="img" aria-label={`${row.category}: terpakai ${formatRupiah(row.actual)} dari ${formatRupiah(row.estimated)}`}>
+                <div className="absolute inset-y-0 left-0 rounded-full bg-gold" style={{ width: `${(row.estimated / max) * 100}%` }} />
+                <div className="absolute inset-y-0 left-0 rounded-full bg-primary" style={{ width: `${(row.actual / max) * 100}%` }} />
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Panel>
+  );
+}
+
 export function BudgetView() {
   const path = useProjectApi();
   const summary = useResource<BudgetSummary>(path("/budget-summary"));
   const [tick, setTick] = useState(0);
+  const all = useResource<BudgetItem[]>(path("/budget-items"), { limit: 100, _r: tick || undefined });
 
   const data = summary.data;
+  const usedPct = data && data.total_budget > 0 ? Math.round((data.actual_total / data.total_budget) * 1000) / 10 : 0;
+  const remainingPct = data && data.total_budget > 0 ? Math.round((data.remaining / data.total_budget) * 1000) / 10 : 0;
   return (
     <>
-      <DashHeader eyebrow="Budget" title="Anggaran & Pengeluaran" description="Pantau estimasi dan realisasi tiap pos. Total anggaran diatur di menu Profile." />
+      <DashHeader
+        eyebrow="Manajemen Finansial Pernikahan"
+        title="Rencana Anggaran & Realisasi Pengeluaran"
+        description="Pantau alokasi dana pernikahan agar tetap terukur, transparan, dan terhindar dari over-budget."
+      />
 
       {summary.loading ? (
         <LoadingBlock rows={2} />
       ) : summary.error || !data ? (
         <ErrorState error={summary.error} onRetry={summary.reload} />
       ) : (
-        <>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard label="Total anggaran" value={formatRupiah(data.total_budget)} />
-            <StatCard label="Estimasi pos" value={formatRupiah(data.estimated_total)} hint={data.items_over_estimate > 0 ? `${data.items_over_estimate} pos melebihi estimasi` : undefined} />
-            <StatCard label="Terpakai" value={formatRupiah(data.actual_total)} />
-            <StatCard label="Sisa" value={formatRupiah(data.remaining)} tone={data.over_budget ? "danger" : "success"} hint={data.status} />
-          </div>
-          <Panel className="mt-4">
-            <ProgressBar value={data.actual_total} max={data.total_budget} tone={data.over_budget ? "danger" : "primary"} />
-          </Panel>
-        </>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Total Plafon Anggaran" value={formatRupiah(data.total_budget)} hint="Plafon diatur di menu Profile" />
+          <StatCard label="Realisasi / Biaya Aktual" value={formatRupiah(data.actual_total)} hint={`${usedPct}% dari plafon`} />
+          <StatCard label="Sisa Cadangan Kas" value={formatRupiah(data.remaining)} tone={data.over_budget ? "danger" : "success"} hint={`${remainingPct}% siap dialokasikan`} />
+          <StatCard
+            label="Status Anggaran"
+            value={<Badge tone={data.over_budget ? "danger" : "success"}>{data.status}</Badge>}
+            hint={data.items_over_estimate > 0 ? `${data.items_over_estimate} pos melebihi estimasi` : "Tidak ada deviasi defisit pada pos utama"}
+          />
+        </div>
       )}
 
       <div className="mt-6">
+        {all.error ? <ErrorState error={all.error} onRetry={all.reload} /> : <AllocationChart items={all.data ?? []} />}
+      </div>
+
+      <div className="mb-3 mt-8">
+        <h2 className="font-serif text-xl font-semibold">Tabel Pengeluaran Detail</h2>
+        <p className="text-xs text-ink-soft">Rincian kontrak vendor, uang muka, dan termin pelunasan.</p>
+      </div>
+      <div>
         <CrudTable<BudgetItem>
           resource="/budget-items"
           noun="pos anggaran"

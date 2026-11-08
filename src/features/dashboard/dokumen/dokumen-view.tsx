@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { HiOutlineArrowDownTray, HiOutlineArrowUpTray } from "react-icons/hi2";
+import { HiOutlineArrowDownTray, HiOutlineArrowUpTray, HiOutlineCloudArrowUp } from "react-icons/hi2";
+import { cn } from "@/lib/utils";
 import { useFeedback } from "@/components/dash/feedback";
 import type { FieldDef, FormValues } from "@/components/dash/form-modal";
 import { Badge, DashHeader, Panel, StatCard, btn, type Tone } from "@/components/dash/primitives";
@@ -30,6 +31,8 @@ export function DokumenView() {
   const feedback = useFeedback();
   const fileInput = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [kind, setKind] = useState("");
   const [tick, setTick] = useState(0);
   const summary = useResource<DocumentSummary>(path("/documents-summary"), { _r: tick || undefined });
   // The API has no file listing: keep files uploaded in this session so they can be attached to a document.
@@ -81,9 +84,8 @@ export function DokumenView() {
   return (
     <>
       <DashHeader
-        eyebrow="Dokumen"
-        title="KUA & Kontrak Penting"
-        description="Simpan dokumen penting. Berkas dibuka lewat tautan bertanda tangan yang berlaku singkat."
+        title="Dokumen & Arsip Kontrak Vendor"
+        description="Kelola kontrak kerja sama, berkas legal KUA, proposal vendor, serta faktur pembayaran dalam satu brankas digital."
         actions={
           <>
             <input
@@ -97,31 +99,66 @@ export function DokumenView() {
                 if (file) void upload(file);
               }}
             />
-            <button type="button" className={btn.secondary} disabled={uploading} onClick={() => fileInput.current?.click()}>
+            <button type="button" className={btn.primary} disabled={uploading} onClick={() => fileInput.current?.click()}>
               <HiOutlineArrowUpTray className="size-4" aria-hidden />
-              {uploading ? "Mengunggah…" : "Unggah berkas"}
+              {uploading ? "Mengunggah…" : "Unggah Dokumen Baru"}
             </button>
           </>
         }
       />
 
       {sum ? (
-        <div className="mb-6 grid gap-4 sm:grid-cols-3">
-          <StatCard label="Total dokumen" value={sum.total} />
-          <StatCard label="KUA ditandatangani" value={`${sum.kua_signed}/${sum.kua_total}`} />
-          <StatCard label="Menunggu TTD" value={sum.by_status.menunggu_ttd ?? 0} />
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Total Dokumen" value={`${sum.total} Berkas`} hint={`${uploaded.length} diunggah di sesi ini`} />
+          <StatCard label="Ditandatangani" value={`${sum.by_status.ditandatangani ?? 0} / ${sum.total}`} tone="success" hint={`${sum.by_status.menunggu_ttd ?? 0} menunggu tanda tangan`} />
+          <StatCard label="Berkas Legal KUA" value={sum.kua_total > 0 ? `${Math.round((sum.kua_signed / sum.kua_total) * 100)}% Lengkap` : "-"} hint={`${sum.kua_signed} dari ${sum.kua_total} ditandatangani`} />
+          <StatCard label="Masih Draf" value={`${sum.by_status.draf ?? 0} Berkas`} hint="Belum diajukan" />
         </div>
       ) : null}
 
+      <div
+        onDragOver={(event) => {
+          event.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(event) => {
+          event.preventDefault();
+          setDragging(false);
+          const file = event.dataTransfer.files[0];
+          if (file) void upload(file);
+        }}
+        className={cn("mb-6 flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-4 py-8 text-center transition", dragging ? "border-primary bg-blush/30" : "border-gold/70 bg-white")}
+      >
+        <span className="grid size-12 place-items-center rounded-full bg-blush text-blush-foreground">
+          <HiOutlineCloudArrowUp className="size-6" aria-hidden />
+        </span>
+        <p className="font-medium">Seret &amp; lepas berkas PDF kontrak atau faktur ke sini, atau pilih lewat tombol unggah</p>
+        <p className="text-xs text-ink-soft">PDF, JPEG, PNG, atau WebP • maksimum 8 MB • tipe diperiksa dari isi berkas</p>
+      </div>
+
+      <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filter jenis dokumen">
+        {[["", `Semua Berkas${sum ? ` (${sum.total})` : ""}`] as const, ...kindOptions.map((option) => [option.value, option.label] as const)].map(([value, label]) => (
+          <button
+            key={value || "all"}
+            type="button"
+            aria-pressed={kind === value}
+            onClick={() => setKind(value)}
+            className={cn("rounded-full border px-4 py-1.5 text-sm font-medium transition", kind === value ? "border-primary bg-primary text-primary-foreground" : "border-gold/60 bg-white hover:bg-cream")}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       <CrudTable<VowlyDocument>
+        key={kind}
         resource="/documents"
+        fixedQuery={kind ? { kind } : undefined}
         noun="dokumen"
         refreshKey={tick}
         onChanged={bump}
-        filters={[
-          { name: "kind", label: "Semua jenis", options: kindOptions },
-          { name: "status", label: "Semua status", options: statusOptions },
-        ]}
+        filters={[{ name: "status", label: "Semua status", options: statusOptions }]}
         columns={[
           { header: "Dokumen", cell: (row) => <span className="font-medium">{row.title}</span> },
           { header: "Jenis", cell: (row) => kinds[row.kind] },

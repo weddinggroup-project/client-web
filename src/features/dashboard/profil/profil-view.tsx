@@ -3,14 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFeedback } from "@/components/dash/feedback";
+import { useResource } from "@/components/dash/use-resource";
 import { FormModal, type FieldDef, type FormValues } from "@/components/dash/form-modal";
-import { Badge, DashHeader, Panel, SectionTitle, btn } from "@/components/dash/primitives";
+import { Badge, DashHeader, Panel, ProgressBar, SectionTitle, btn } from "@/components/dash/primitives";
 import { api } from "@/lib/vowly/client";
 import { formatDate, formatRupiah, parseRupiah } from "@/lib/vowly/format";
 import type { CoupleMember, GiftAccount } from "@/lib/vowly/types";
 import { CrudTable } from "../crud/crud-table";
 import { initialText, text } from "../crud/payload";
-import { useProject } from "../project-context";
+import { useProject, useProjectApi } from "../project-context";
 
 const settingsFields: FieldDef[] = [
   { kind: "text", name: "title", label: "Judul proyek", required: true, maxLength: 150, span: 2 },
@@ -137,10 +138,62 @@ function ChangePassword() {
   );
 }
 
+/**
+ * Share of profile fields filled in: project basics, both couple members, and at least one gift account.
+ * Pure so the percentage on the hero card is testable.
+ */
+export function profileCompleteness(input: { venue: string | null; city: string | null; guestCount: number | null; loveStory: string | null; totalBudget: number; members: number; giftAccounts: number }): number {
+  const checks = [Boolean(input.venue), Boolean(input.city), Boolean(input.guestCount), Boolean(input.loveStory), input.totalBudget > 0, input.members >= 2, input.giftAccounts >= 1];
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+}
+
+function Hero() {
+  const { project } = useProject();
+  const path = useProjectApi();
+  const members = useResource<CoupleMember[]>(path("/couple-members"), { limit: 10 });
+  const gifts = useResource<GiftAccount[]>(path("/gift-accounts"), { limit: 10 });
+  const pct = profileCompleteness({
+    venue: project.venue,
+    city: project.city,
+    guestCount: project.guest_count,
+    loveStory: project.love_story,
+    totalBudget: project.total_budget,
+    members: members.meta?.total ?? members.data?.length ?? 0,
+    giftAccounts: gifts.meta?.total ?? gifts.data?.length ?? 0,
+  });
+  const groom = members.data?.find((member) => member.role === "groom");
+  const bride = members.data?.find((member) => member.role === "bride");
+  return (
+    <div className="mb-6 grid gap-4 rounded-2xl border border-gold/50 bg-gradient-to-br from-gold/40 to-blush/30 p-6 lg:grid-cols-[1fr_300px]">
+      <div>
+        <Badge tone="gold">Pasangan Vowly</Badge>
+        <h2 className="mt-3 font-serif text-3xl font-semibold leading-tight">
+          {groom && bride ? `${groom.full_name} & ${bride.full_name}` : project.title}
+        </h2>
+        <p className="mt-2 text-sm text-ink-soft">
+          Akad &amp; Resepsi: {formatDate(project.event_date)}
+          {project.venue ? ` • ${project.venue}${project.city ? `, ${project.city}` : ""}` : ""}
+        </p>
+      </div>
+      <div className="rounded-xl bg-white/80 p-4">
+        <div className="flex items-center justify-between text-sm font-semibold">
+          <span>Kelengkapan Profil</span>
+          <span>{pct}%</span>
+        </div>
+        <div className="mt-2">
+          <ProgressBar value={pct} />
+        </div>
+        <p className="mt-2 text-xs text-ink-soft">Lengkapi lokasi, kisah cinta, anggaran, kedua mempelai, dan rekening angpao.</p>
+      </div>
+    </div>
+  );
+}
+
 export function ProfilView() {
   return (
     <>
-      <DashHeader eyebrow="Profile" title="Biodata & Pengaturan" description="Data mempelai muncul di undangan. Rekening angpao hanya terlihat oleh pemilik dan kolaborator berizin." />
+      <DashHeader title="Profil Calon Mempelai & Pengaturan Pernikahan" description="Kelola data pribadi kedua mempelai, identitas hari bahagia, susunan panitia keluarga, serta preferensi akun Vowly Anda." />
+      <Hero />
       <ProjectSettings />
 
       <div className="mb-6">

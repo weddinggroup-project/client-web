@@ -1,80 +1,16 @@
-export type Package = {
-  id: string;
-  name: string;
-  price: number;
-  isPopular?: boolean;
-  features: string[];
+/** Package code highlighted as "Terpopuler". UI-only marker: the API has no such flag. */
+export const POPULAR_PACKAGE_CODE = "journey";
+
+/** Card decoration per template slug. Names and ids come from the API; colors/taglines are presentation only. */
+export type TemplateStyle = { tagline: string; colors: [string, string] };
+
+export const templateStyles: Record<string, TemplateStyle> = {
+  "blush-elegance": { tagline: "Minimalis & Anggun", colors: ["#f6e4e8", "#a97078"] },
+  "emerald-gold": { tagline: "Klasik & Mewah", colors: ["#1f3d33", "#c9a86a"] },
+  "rustic-botanical": { tagline: "Organik & Natural", colors: ["#eee7da", "#6b3f45"] },
 };
 
-export const packages: Package[] = [
-  {
-    id: "promise",
-    name: "Promise",
-    price: 220_000,
-    features: [
-      "Dashboard Wedding Planner",
-      "Budget Tracker",
-      "Manajemen Guest List",
-      "To do List checklist",
-    ],
-  },
-  {
-    id: "journey",
-    name: "Journey",
-    price: 350_000,
-    isPopular: true,
-    features: [
-      "Dashboard Wedding Planner",
-      "Budget Tracker",
-      "Manajemen Guest List",
-      "To do List checklist",
-      "AI Assistant",
-      "Reminder otomatis",
-    ],
-  },
-  {
-    id: "forever",
-    name: "Forever",
-    price: 690_000,
-    features: [
-      "Dashboard Wedding Planner",
-      "Budget Tracker",
-      "Manajemen Guest List",
-      "To do List checklist",
-      "AI Assistant",
-      "Reminder otomatis",
-      "Personal Bride Assistant",
-    ],
-  },
-];
-
-export type InvitationTemplate = {
-  id: string;
-  name: string;
-  tagline: string;
-  colors: [string, string];
-};
-
-export const invitationTemplates: InvitationTemplate[] = [
-  {
-    id: "blush-elegance",
-    name: "Blush Elegance",
-    tagline: "Minimalis & Anggun",
-    colors: ["#f6e4e8", "#a97078"],
-  },
-  {
-    id: "emerald-gold",
-    name: "Emerald Gold",
-    tagline: "Klasik & Mewah",
-    colors: ["#1f3d33", "#c9a86a"],
-  },
-  {
-    id: "rustic-botanical",
-    name: "Rustic Botanical",
-    tagline: "Organik & Natural",
-    colors: ["#eee7da", "#6b3f45"],
-  },
-];
+export const defaultTemplateStyle: TemplateStyle = { tagline: "Desain undangan", colors: ["#f3ede1", "#6b3f45"] };
 
 export const preparationStages = [
   { value: "lamaran", label: "Tahap Lamaran" },

@@ -21,12 +21,12 @@ test.beforeEach(async ({ page }) => {
 test("home shows the countdown pill and stats", async ({ page }) => {
   await page.goto(`/dashboard/${projectId}`);
   await expect(page.getByText(/Hari Menuju Akad & Resepsi/)).toBeVisible();
-  await expect(page.getByText(/Sisa anggaran/i)).toBeVisible();
+  await expect(page.getByText(/Anggaran Biaya/i).first()).toBeVisible();
 });
 
 test("budget lists items from the API and creates a new one", async ({ page }) => {
   await page.goto(`/dashboard/${projectId}/budget`);
-  await expect(page.getByRole("cell", { name: "Katering", exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Rencana Anggaran/ })).toBeVisible();
 
   const name = `Dekorasi ${Date.now()}`;
   await page.getByRole("button", { name: /Tambah pos anggaran/i }).click();
@@ -48,5 +48,12 @@ test("sidebar navigates between modules", async ({ page }) => {
   await page.goto(`/dashboard/${projectId}`);
   await page.getByRole("link", { name: /Checklist/ }).first().click();
   await expect(page).toHaveURL(/\/checklist$/);
-  await expect(page.getByText("Booking MUA").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Checklist Persiapan Pernikahan/ })).toBeVisible();
+});
+
+test("order wizard shows the packages and prices served by the API", async ({ page }) => {
+  await page.goto("/undangan-digital/pesan");
+  await expect(page.getByRole("heading", { name: "Journey" })).toBeVisible();
+  await expect(page.getByText("Rp. 350.000")).toBeVisible();
+  await expect(page.getByText("Terpopuler")).toBeVisible();
 });

@@ -29,6 +29,8 @@ type Props<T extends { id: string }> = {
   pageSize?: number;
   /** Called after any create/update/delete so siblings (summaries) can reload. */
   onChanged?: () => void;
+  /** Always-applied query params (e.g. a category chosen outside the table); changing them resets to page 1. */
+  fixedQuery?: Record<string, string>;
   /** Extra data reload key; bump to refetch the list from outside. */
   refreshKey?: number;
   extraActions?: (row: T) => ReactNode;
@@ -48,6 +50,7 @@ export function CrudTable<T extends { id: string }>({
   pageSize = 10,
   onChanged,
   refreshKey = 0,
+  fixedQuery,
   extraActions,
   toolbar,
   addLabel,
@@ -64,6 +67,7 @@ export function CrudTable<T extends { id: string }>({
     limit: pageSize,
     search: search || undefined,
     ...filterValues,
+    ...fixedQuery,
     _r: refreshKey || undefined,
   });
 

@@ -1,8 +1,20 @@
 import { Container } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
+import { apiRequest } from "@/lib/vowly/server";
+import { formatRupiah } from "@/lib/vowly/format";
+import type { Package } from "@/lib/vowly/types";
 
-export function PricingSection() {
+/** Lowest active package price from the API; null when the API is unreachable (the card then shows no number). */
+async function startingPrice(): Promise<number | null> {
+  const result = await apiRequest<Package[]>("/packages");
+  if (!result.ok) return null;
+  const prices = result.data.filter((pkg) => pkg.is_active).map((pkg) => pkg.price);
+  return prices.length > 0 ? Math.min(...prices) : null;
+}
+
+export async function PricingSection() {
+  const price = await startingPrice();
   return (
     <section id="kerjasama" className="scroll-mt-20 bg-background py-20 sm:py-28">
       <Container className="text-center">
@@ -29,7 +41,7 @@ export function PricingSection() {
             Mulai Dengan Harga
           </p>
           <p className="mt-3 font-serif text-4xl font-bold text-primary">
-            Rp. 220.000
+            {price === null ? "Lihat paket" : formatRupiah(price)}
           </p>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
             Atur rencana mu dengan matang dari sekarang.
