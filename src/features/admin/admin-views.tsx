@@ -1,7 +1,10 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
-import { Badge, DashHeader, StatCard } from "@/components/dash/primitives";
+import { HiOutlineCube, HiOutlinePaintBrush, HiOutlineTicket, HiOutlineUsers } from "react-icons/hi2";
+import { Badge, DashHeader, Panel, SectionTitle, StatCard } from "@/components/dash/primitives";
+import { EmptyState, ErrorState, LoadingBlock } from "@/components/dash/states";
 import type { FieldDef, FormValues } from "@/components/dash/form-modal";
 import { useResource } from "@/components/dash/use-resource";
 import { adminApi } from "@/lib/vowly/client";
@@ -24,21 +27,78 @@ export function AdminOverview() {
   const packages = useCount("/packages");
   const templates = useCount("/templates");
   const vouchers = useCount("/vouchers");
-  const cards: [string, ReturnType<typeof useCount>, string, string][] = [
-    ["Pengguna", users, "/admin/pengguna", "Akun terdaftar"],
-    ["Paket", packages, "/admin/paket", "Harga dan fitur"],
-    ["Template", templates, "/admin/template", "Desain undangan"],
-    ["Voucher", vouchers, "/admin/voucher", "Voucher dan referral"],
+  const activePackages = useResource<Package[]>("/packages", { limit: 10 }, true, adminApi);
+  const activeVouchers = useResource<AdminVoucher[]>("/vouchers", { limit: 10 }, true, adminApi);
+  const cards: [string, ReturnType<typeof useCount>, string, string, ReactNode][] = [
+    ["Pengguna Terdaftar", users, "/admin/pengguna", "Akun pengguna dan admin", <HiOutlineUsers key="u" />],
+    ["Paket Layanan", packages, "/admin/paket", "Harga dan fitur", <HiOutlineCube key="p" />],
+    ["Template Undangan", templates, "/admin/template", "Desain yang dapat dipilih", <HiOutlinePaintBrush key="t" />],
+    ["Voucher & Referral", vouchers, "/admin/voucher", "Kode potongan harga", <HiOutlineTicket key="v" />],
   ];
   return (
     <>
-      <DashHeader eyebrow="Administrasi" title="Ringkasan Platform" description="Kelola pengguna dan katalog yang dipakai seluruh calon pengantin di Vowly." />
+      <DashHeader eyebrow="Administrasi" title="Ringkasan Platform" description="Kelola pengguna dan katalog yang dipakai seluruh calon pengantin di Vowly, dari paket dan harga sampai voucher." />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map(([label, count, href, hint]) => (
+        {cards.map(([label, count, href, hint, icon]) => (
           <Link key={href} href={href} className="block rounded-2xl transition hover:-translate-y-0.5">
-            <StatCard label={label} value={count.failed ? "-" : (count.total ?? "…")} hint={hint} />
+            <StatCard icon={icon} label={label} value={count.failed ? "-" : (count.total ?? "…")} hint={hint} chip="Kelola" />
           </Link>
         ))}
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <Panel>
+          <SectionTitle eyebrow="Katalog" title="Paket Layanan" aside={<Link href="/admin/paket" className="text-xs font-semibold text-primary">Kelola →</Link>} />
+          {activePackages.loading ? (
+            <LoadingBlock rows={3} />
+          ) : activePackages.error ? (
+            <ErrorState error={activePackages.error} onRetry={activePackages.reload} />
+          ) : (
+            <ul className="space-y-3">
+              {(activePackages.data ?? []).map((pkg) => (
+                <li key={pkg.id} className="flex items-center justify-between rounded-xl bg-cream p-3 text-sm">
+                  <span>
+                    <span className="block font-semibold">{pkg.name}</span>
+                    <span className="block text-xs text-ink-soft">{pkg.features.length} fitur • {pkg.code}</span>
+                  </span>
+                  <span className="text-right">
+                    <span className="block font-semibold">{formatRupiah(pkg.price)}</span>
+                    <Badge tone={pkg.is_active ? "success" : "neutral"}>{pkg.is_active ? "Aktif" : "Nonaktif"}</Badge>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+
+        <Panel>
+          <SectionTitle eyebrow="Promosi" title="Voucher & Referral" aside={<Link href="/admin/voucher" className="text-xs font-semibold text-primary">Kelola →</Link>} />
+          {activeVouchers.loading ? (
+            <LoadingBlock rows={3} />
+          ) : activeVouchers.error ? (
+            <ErrorState error={activeVouchers.error} onRetry={activeVouchers.reload} />
+          ) : (activeVouchers.data ?? []).length === 0 ? (
+            <EmptyState title="Belum ada voucher" description="Buat voucher untuk memberi potongan saat pemesanan." />
+          ) : (
+            <ul className="space-y-3">
+              {(activeVouchers.data ?? []).map((voucher) => (
+                <li key={voucher.id} className="flex items-center justify-between rounded-xl bg-cream p-3 text-sm">
+                  <span>
+                    <span className="block font-mono font-semibold">{voucher.code}</span>
+                    <span className="block text-xs text-ink-soft">
+                      {voucher.kind === "voucher" ? "Voucher" : "Referral"} • terpakai {voucher.used_count}
+                      {voucher.quota !== null ? ` / ${voucher.quota}` : ""}
+                    </span>
+                  </span>
+                  <span className="text-right">
+                    <span className="block font-semibold">{voucher.discount_type === "percent" ? `${voucher.amount}%` : formatRupiah(voucher.amount)}</span>
+                    <Badge tone={voucher.is_active ? "success" : "neutral"}>{voucher.is_active ? "Aktif" : "Nonaktif"}</Badge>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
       </div>
     </>
   );

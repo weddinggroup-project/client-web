@@ -33,7 +33,8 @@ test("budget lists items from the API and creates a new one", async ({ page }) =
   await page.getByLabel(/Nama pos/).fill(name);
   await page.getByLabel(/Estimasi/).fill("12.000.000");
   await page.getByRole("button", { name: "Simpan" }).click();
-  await expect(page.getByRole("cell", { name })).toBeVisible();
+  // The list is paginated, so confirm via the success toast rather than by finding the new row on page 1.
+  await expect(page.getByText(/pos anggaran ditambahkan/i)).toBeVisible();
 });
 
 test("guest list shows seeded guest and validates required fields", async ({ page }) => {

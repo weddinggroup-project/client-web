@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { HiBars3, HiOutlineArrowRightOnRectangle, HiOutlineCube, HiOutlineHome, HiOutlinePaintBrush, HiOutlineTicket, HiOutlineUsers, HiXMark } from "react-icons/hi2";
+import { HiOutlineArrowRightOnRectangle, HiOutlineCube, HiOutlineHome, HiOutlinePaintBrush, HiOutlineTicket, HiOutlineUsers } from "react-icons/hi2";
 import type { IconType } from "react-icons";
-import { FeedbackProvider } from "@/components/dash/feedback";
+import { AppShell, Breadcrumbs } from "@/components/dash/app-shell";
 import { api } from "@/lib/vowly/client";
 import { cn } from "@/lib/utils";
 import { initials } from "@/lib/vowly/format";
@@ -55,7 +55,8 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
 
 export function AdminShell({ user, children }: { user: User; children: ReactNode }) {
   const router = useRouter();
-  const [drawer, setDrawer] = useState(false);
+  const pathname = usePathname();
+  const active = items.find((item) => isAdminActive(pathname, item.href));
 
   async function logout() {
     try {
@@ -67,55 +68,26 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
   }
 
   return (
-    <FeedbackProvider>
-      <div className="min-h-screen bg-cream font-dash text-ink">
-        <aside className="fixed inset-y-0 left-0 z-20 hidden w-[260px] border-r border-gold/40 bg-white lg:block">
-          <div className="flex h-16 items-center gap-2 border-b border-gold/40 px-5">
-            <Link href="/admin" className="font-serif text-2xl font-semibold text-accent">
-              Vowly
-            </Link>
-            <span className="rounded-full bg-gold/50 px-2 py-0.5 text-[11px] font-semibold text-gold-foreground">Admin</span>
-          </div>
-          <Nav />
-        </aside>
-
-        {drawer ? (
-          <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu admin">
-            <button type="button" aria-label="Tutup menu" className="absolute inset-0 bg-ink/30" onClick={() => setDrawer(false)} />
-            <div className="absolute inset-y-0 left-0 w-72 bg-white shadow-2xl">
-              <div className="flex h-16 items-center justify-between border-b border-gold/40 px-5">
-                <span className="font-serif text-2xl font-semibold text-accent">Vowly Admin</span>
-                <button type="button" aria-label="Tutup menu" onClick={() => setDrawer(false)}>
-                  <HiXMark className="size-6" aria-hidden />
-                </button>
-              </div>
-              <Nav onNavigate={() => setDrawer(false)} />
-            </div>
-          </div>
-        ) : null}
-
-        <div className="lg:pl-[260px]">
-          <header className="sticky top-0 z-10 flex h-16 items-center justify-between gap-3 border-b border-gold/40 bg-white/95 px-4 backdrop-blur sm:px-6">
-            <div className="flex items-center gap-3">
-              <button type="button" className="lg:hidden" aria-label="Buka menu" onClick={() => setDrawer(true)}>
-                <HiBars3 className="size-6" aria-hidden />
-              </button>
-              <p className="rounded-full border border-gold/60 bg-blush/30 px-4 py-1.5 text-sm font-medium">Panel Administrasi Vowly</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="hidden text-right sm:block">
-                <span className="block max-w-48 truncate text-sm leading-4 font-semibold">{user.name}</span>
-                <span className="block text-[11px] leading-4 text-ink-soft">{user.email}</span>
-              </span>
-              <span className="grid size-9 place-items-center rounded-full bg-blush text-xs font-semibold text-blush-foreground">{initials(user.name)}</span>
-              <button type="button" onClick={() => void logout()} className="rounded-lg p-2 text-red-700 hover:bg-red-50" aria-label="Keluar">
-                <HiOutlineArrowRightOnRectangle className="size-5" aria-hidden />
-              </button>
-            </div>
-          </header>
-          <main className="mx-auto w-full max-w-[1100px] px-4 py-6 sm:px-6 lg:px-8">{children}</main>
-        </div>
-      </div>
-    </FeedbackProvider>
+    <AppShell
+      homeHref="/admin"
+      badge="Admin"
+      pill="Panel Administrasi Vowly • Kelola pengguna & katalog"
+      breadcrumbs={<Breadcrumbs items={[{ label: "Beranda", href: "/admin" }, { label: "Administrasi", href: "/admin" }, ...(active && active.href !== "/admin" ? [{ label: active.label }] : [{ label: "Ringkasan" }])]} />}
+      renderNav={(onNavigate) => <Nav onNavigate={onNavigate} />}
+      user={
+        <>
+          <span className="grid size-10 place-items-center rounded-full bg-blush text-xs font-semibold text-blush-foreground ring-2 ring-gold/50">{initials(user.name)}</span>
+          <span className="hidden text-left sm:block">
+            <span className="block max-w-44 truncate text-sm leading-4 font-semibold">{user.name}</span>
+            <span className="block text-[11px] leading-4 text-ink-soft">Administrator</span>
+          </span>
+          <button type="button" onClick={() => void logout()} className="rounded-lg p-2 text-red-700 hover:bg-red-50" aria-label="Keluar">
+            <HiOutlineArrowRightOnRectangle className="size-5" aria-hidden />
+          </button>
+        </>
+      }
+    >
+      {children}
+    </AppShell>
   );
 }

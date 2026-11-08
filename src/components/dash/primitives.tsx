@@ -53,7 +53,7 @@ export function DashHeader({
             {eyebrow}
           </span>
         ) : null}
-        <h1 className="mt-2 font-serif text-3xl leading-tight font-semibold tracking-tight text-ink sm:text-[32px]">
+        <h1 className="mt-2 font-serif text-3xl leading-tight font-semibold tracking-tight text-ink sm:text-4xl lg:text-[40px]">
           {title}
         </h1>
         {description ? <p className="mt-2 text-sm leading-6 text-ink-soft">{description}</p> : null}
@@ -93,25 +93,38 @@ export function StatCard({
   hint,
   tone,
   icon,
+  chip,
 }: {
   label: string;
   value: ReactNode;
   hint?: ReactNode;
   tone?: Tone;
+  /** When set, the card uses the Figma "icon tile" layout: tile and chip on top, then value, then label. */
   icon?: ReactNode;
+  chip?: ReactNode;
 }) {
+  const hintClass = cn("mt-1 text-xs", tone === "danger" ? "text-red-700" : tone === "success" ? "text-emerald-700" : "text-ink-soft");
+  if (icon) {
+    return (
+      <div className="rounded-2xl border border-gold/50 bg-white p-5 shadow-sm shadow-gold/20">
+        <div className="flex items-start justify-between gap-2">
+          <span className="grid size-11 place-items-center rounded-xl bg-gold/40 text-gold-foreground [&>svg]:size-5">{icon}</span>
+          {chip ? <span className="rounded-full bg-gold/40 px-2.5 py-0.5 text-[11px] font-semibold text-gold-foreground">{chip}</span> : null}
+        </div>
+        <p className="mt-4 font-serif text-3xl font-semibold text-ink">{value}</p>
+        <p className="mt-1 text-sm text-ink-soft">{label}</p>
+        {hint ? <p className={hintClass}>{hint}</p> : null}
+      </div>
+    );
+  }
   return (
     <div className="rounded-2xl border border-gold/50 bg-white p-4 shadow-sm shadow-gold/20">
       <div className="flex items-start justify-between gap-2">
         <p className="text-[11px] font-medium tracking-[0.1em] text-ink-soft uppercase">{label}</p>
-        {icon ? <span className="text-ink-soft">{icon}</span> : null}
+        {chip ? <span className="rounded-full bg-gold/40 px-2 py-0.5 text-[11px] font-semibold text-gold-foreground">{chip}</span> : null}
       </div>
       <p className="mt-2 font-serif text-2xl font-semibold text-ink">{value}</p>
-      {hint ? (
-        <p className={cn("mt-1 text-xs", tone === "danger" ? "text-red-700" : tone === "success" ? "text-emerald-700" : "text-ink-soft")}>
-          {hint}
-        </p>
-      ) : null}
+      {hint ? <p className={hintClass}>{hint}</p> : null}
     </div>
   );
 }

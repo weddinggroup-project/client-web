@@ -105,9 +105,15 @@ export function HomeView() {
           </p>
           <p className="mt-1 text-sm text-ink-soft">Estimasi {formatNumber(data.guest_estimate)} Pax</p>
           <div className="mt-4 grid grid-cols-3 gap-2 border-t border-gold/40 pt-3 text-xs text-ink-soft">
-            <span><strong className="block text-sm text-ink">{hadir ?? "-"}</strong>Hadir</span>
-            <span><strong className="block text-sm text-ink">{menunggu ?? "-"}</strong>Menunggu</span>
-            <span><strong className="block text-sm text-ink">{menolak ?? "-"}</strong>Menolak</span>
+            {([["Hadir", hadir, "bg-gold-foreground"], ["Menunggu", menunggu, "bg-gold"], ["Menolak", menolak, "bg-blush"]] as const).map(([name, count, dot]) => (
+              <span key={name}>
+                <strong className="flex items-center gap-1.5 text-sm text-ink">
+                  <span className={`size-2 rounded-full ${dot}`} aria-hidden />
+                  {count ?? "-"}
+                </strong>
+                {name}
+              </span>
+            ))}
           </div>
         </Card>
 
@@ -133,9 +139,10 @@ export function HomeView() {
           {data.recent_activity.length === 0 ? (
             <EmptyState title="Belum ada aktivitas" description="Perubahan pada tamu, anggaran, dan tugas akan tampil di sini." />
           ) : (
-            <ol className="space-y-3 border-l-2 border-gold/60 pl-4">
-              {data.recent_activity.map((entry) => (
-                <li key={entry.id} className="rounded-xl bg-cream p-3 text-sm">
+            <ol className="space-y-3 border-l-2 border-gold/60 pl-5">
+              {data.recent_activity.map((entry, index) => (
+                <li key={entry.id} className="relative rounded-xl bg-cream p-3 text-sm">
+                  <span aria-hidden className={`absolute top-4 -left-[27px] size-3 rounded-full border-2 border-white ${index === 0 ? "bg-gold-foreground" : index === 1 ? "bg-gold" : "bg-blush"}`} />
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-ink">{entry.message}</p>
                     <span className="shrink-0 text-xs text-ink-soft">{formatRelative(entry.created_at)}</span>

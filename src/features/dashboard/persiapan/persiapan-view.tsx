@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { HiOutlineMapPin, HiOutlinePencilSquare, HiOutlinePlus, HiOutlineTrash, HiOutlineUser } from "react-icons/hi2";
+import { HiOutlineClock, HiOutlineMapPin, HiOutlineUserGroup, HiOutlineCheckCircle, HiOutlinePencilSquare, HiOutlinePlus, HiOutlineTrash, HiOutlineUser } from "react-icons/hi2";
 import { useFeedback } from "@/components/dash/feedback";
 import { FormModal } from "@/components/dash/form-modal";
 import { Badge, DashHeader, Panel, ProgressBar, SectionTitle, StatCard, btn, type Tone } from "@/components/dash/primitives";
@@ -131,15 +131,20 @@ export function PersiapanView() {
       />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        <StatCard label="Sesi Terjadwal" value={list.data ? `${all.length} Sesi` : "-"} hint={span} />
-        <StatCard label="Mitra Terlibat" value={list.data ? `${involved} Vendor` : "-"} hint="Terhubung ke rundown" />
-        <div className="rounded-2xl border border-gold/50 bg-white p-4 shadow-sm shadow-gold/20">
-          <p className="text-[11px] font-medium tracking-[0.1em] text-ink-soft uppercase">Kesiapan Rundown</p>
-          <p className="mt-2 font-serif text-2xl font-semibold">{summary.data ? `${summary.data.ready_percent}% Siap` : "-"}</p>
+        <StatCard icon={<HiOutlineClock />} label="Sesi Terjadwal" value={list.data ? all.length : "-"} chip={`${groups.length} Kelompok`} hint={span} />
+        <StatCard icon={<HiOutlineUserGroup />} label="Mitra Terlibat" value={list.data ? involved : "-"} chip="Vendor" hint="Terhubung ke rundown" />
+        <div className="rounded-2xl border border-gold/50 bg-white p-5 shadow-sm shadow-gold/20">
+          <div className="flex items-start justify-between">
+            <span className="grid size-11 place-items-center rounded-xl bg-gold/40 text-gold-foreground">
+              <HiOutlineCheckCircle className="size-5" aria-hidden />
+            </span>
+            <span className="rounded-full bg-gold/40 px-2.5 py-0.5 text-[11px] font-semibold text-gold-foreground">{summary.data ? `${summary.data.total - summary.data.ready} Perlu Dilengkapi` : "-"}</span>
+          </div>
+          <p className="mt-4 font-serif text-3xl font-semibold">{summary.data ? `${summary.data.ready_percent}%` : "-"} <span className="text-base font-normal text-ink-soft">Siap</span></p>
+          <p className="mt-1 text-sm text-ink-soft">Kesiapan Rundown</p>
           <div className="mt-2">
             <ProgressBar value={summary.data?.ready_percent ?? 0} />
           </div>
-          <p className="mt-1 text-xs text-ink-soft">{summary.data ? `${summary.data.ready} dari ${summary.data.total} sesi punya PIC, lokasi, dan vendor` : ""}</p>
         </div>
       </div>
 
