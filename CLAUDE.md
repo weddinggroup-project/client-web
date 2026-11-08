@@ -14,6 +14,7 @@ checkout API tetapi di-ignore oleh repo API.
 - Autentikasi lewat API (JWT di cookie httpOnly `vowly_token`, pola BFF). Better Auth sudah dihapus.
 - Dashboard `/dashboard/[projectId]/…`: Home, Persiapan, Budget, Guest List, Checklist, Dokumen, Vendor, Undangan
   (template, kirim WhatsApp, kolaborator), AI Assistant, Profile — semuanya memakai endpoint API M1–M6.
+- Area admin `/admin` (hanya `role=admin`; user biasa dialihkan ke `/dashboard`): Ringkasan, Pengguna, Paket, Template, Voucher lewat `/api/admin/*`. Login admin mendarat di `/admin`.
 - Wizard `/undangan-digital/pesan`: paket → detail → lokasi → kolaborasi → template → rincian (voucher/referral) →
   invoice Virtual Account dengan polling status. `/kolaborasi/terima` untuk token undangan.
 - Di luar lingkup (API belum punya): alur Mitra/partner, lonceng notifikasi, lupa password (UI jujur menyatakannya),
@@ -96,7 +97,8 @@ Prinsip: bekerja di dalam lingkup yang diminta, tidak punya efek keluar tanpa pe
 - Perintah destruktif (`rm -rf`, `docker system prune`, dll.).
 - Menyimpan token JWT di tempat yang bisa dibaca JS, melonggarkan cookie (`httpOnly`, `sameSite`, `secure`), memperluas
   allow-list proxy (`proxy-path.ts`) atau melewati pemeriksaan same-origin, atau mengaktifkan akses ke `/admin`,
-  `/webhooks`, atau `/auth/login|register` lewat proxy.
+  `/webhooks`, atau `/auth/login|register` lewat `/api/backend`. Endpoint admin hanya lewat `/api/admin/*`, yang
+  memeriksa `role=admin` di server; jangan melonggarkan pemeriksaan itu.
 - Menghitung harga/total/potongan di klien sebagai sumber kebenaran; mempercayai `role`/`user_id` dari klien.
 - Mengirim data proyek atau data tamu ke layanan pihak ketiga (analytics, AI, upload) tanpa diminta.
 - Menambah/meng-upgrade dependensi tanpa persetujuan. Mengarang fitur yang tidak ada di Figma atau API: tandai

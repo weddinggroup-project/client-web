@@ -13,6 +13,8 @@ export default async function DashboardIndex() {
   if (!result.ok) throw new Error(result.message);
 
   const projects = result.data;
+  // An admin without any wedding project belongs in the admin area, not an empty planner.
+  if (user.role === "admin" && projects.length === 0) redirect("/admin");
   if (projects.length === 1 && projects[0]) redirect(`/dashboard/${projects[0].id}`);
 
   return (

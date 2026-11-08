@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { errorFromEnvelope, toQueryString } from "./client";
 import { formatDate, formatRelative, formatRupiah, formatRupiahShort, initials, parseRupiah } from "./format";
-import { isAllowedBackendPath, isSameOrigin } from "./proxy-path";
-import { safeNext } from "./safe-next";
+import { hasSafeSegments, isAllowedBackendPath, isSameOrigin } from "./proxy-path";
+import { landingPath, safeNext } from "./safe-next";
 import { SESSION_COOKIE, sessionCookieOptions, tokenMaxAge } from "./session-cookie";
 
 const jwt = (payload: object) => `h.${Buffer.from(JSON.stringify(payload)).toString("base64url")}.s`;
@@ -103,5 +103,22 @@ describe("format", () => {
     expect(initials("Dimas Prasetyo")).toBe("DP");
     expect(initials("  ayu ")).toBe("A");
     expect(initials("")).toBe("?");
+  });
+});
+
+describe("landingPath", () => {
+  it("sends admins to /admin by default but honours an explicit return path", () => {
+    expect(landingPath("admin", "/dashboard")).toBe("/admin");
+    expect(landingPath("admin", "/dashboard/abc")).toBe("/dashboard/abc");
+    expect(landingPath("user", "/dashboard")).toBe("/dashboard");
+  });
+});
+
+describe("hasSafeSegments", () => {
+  it("accepts plain segments only", () => {
+    expect(hasSafeSegments(["users", "123"])).toBe(true);
+    expect(hasSafeSegments([])).toBe(false);
+    expect(hasSafeSegments(["..", "x"])).toBe(false);
+    expect(hasSafeSegments(["a%2Fb"])).toBe(false);
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { api, ApiError, toQueryString } from "@/lib/vowly/client";
+import { api, ApiError, toQueryString, type ApiClient } from "@/lib/vowly/client";
 import type { PageMeta } from "@/lib/vowly/types";
 
 type Query = Record<string, string | number | boolean | undefined | null>;
@@ -12,7 +12,7 @@ type State<T> = { key: string; data?: T; meta?: PageMeta; error?: ApiError };
  * key arrives, so switching page or filter never shows the previous key's data as if it were current. `reload`
  * refetches in place (the old data stays visible meanwhile). Pass `enabled: false` to skip the request.
  */
-export function useResource<T>(path: string, query?: Query, enabled = true) {
+export function useResource<T>(path: string, query?: Query, enabled = true, client: Pick<ApiClient, "get"> = api) {
   const key = `${path}${toQueryString(query)}`;
   const [state, setState] = useState<State<T>>({ key: "" });
   const [tick, setTick] = useState(0);
@@ -20,7 +20,7 @@ export function useResource<T>(path: string, query?: Query, enabled = true) {
   useEffect(() => {
     if (!enabled) return;
     const controller = new AbortController();
-    api
+    client
       .get<T>(path, query, controller.signal)
       .then((response) => setState({ key, data: response.data, meta: response.meta }))
       .catch((error: unknown) => {
@@ -30,7 +30,7 @@ export function useResource<T>(path: string, query?: Query, enabled = true) {
     return () => controller.abort();
     // `query` is represented by `key`; including the object would refetch on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, tick, enabled]);
+  }, [key, tick, enabled, client]);
 
   const reload = useCallback(() => setTick((value) => value + 1), []);
   const current = state.key === key;

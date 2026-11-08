@@ -23,6 +23,14 @@ Browser ──(JSON, same-origin)──> Next.js ──(Bearer JWT)──> Vowly
   `requireSession` dan API.
 - **401** di browser → `window.location` ke `/sign-in?next=<path>`.
 
+## Area admin
+
+`/admin/*` (layout server: `requireSession` + `role === "admin"`, selain itu redirect ke `/dashboard`). Data lewat
+`adminApi` (`/api/admin/*`), route handler yang memeriksa `role=admin` via `GET /users/me` lalu meneruskan ke
+`/api/v1/admin/<path>` dengan forwarder bersama (`forward.ts`); `/api/backend` tetap menolak `admin`. API menegakkan
+`RequireAdmin` lagi di setiap panggilan. `CrudTable` dipakai ulang lewat props `pathOf` dan `client`. Login: admin
+mendarat di `/admin` kecuali ada `?next=` eksplisit (`landingPath`); `/dashboard` tanpa proyek mengalihkan admin ke `/admin`.
+
 ## Dashboard
 
 `src/app/dashboard/[projectId]/layout.tsx` (server): `requireSession` → `GET /invitations/{id}` (404 → not-found) →

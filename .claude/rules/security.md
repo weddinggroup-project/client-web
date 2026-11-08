@@ -2,6 +2,7 @@
 
 - Token JWT hanya di cookie `vowly_token` (httpOnly, SameSite=Lax, Secure di https, masa berlaku = `exp`). Tidak ada
   token di JS, localStorage, URL, log, atau respons JSON ke browser (login hanya mengembalikan profil).
+- Area admin: hanya lewat `/api/admin/*` (cek `role=admin` di server + `RequireAdmin` di API) dan halaman `/admin` yang menolak non-admin; tidak pernah lewat `/api/backend`.
 - Proxy `/api/backend` meneruskan token, jadi bukan open relay: segmen path dibatasi regex, panjang maks, daftar blokir,
   dan metode state-changing menolak `Origin` berbeda host. Ubah hanya dengan tes di `vowly.test.ts` dan izin pengguna.
 - `safeNext` untuk setiap redirect `?next=`: hanya path dalam situs. Jangan redirect ke URL dari input.

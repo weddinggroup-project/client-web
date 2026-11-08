@@ -8,14 +8,14 @@ import { Pagination } from "@/components/dash/pagination";
 import { Panel, btn } from "@/components/dash/primitives";
 import { EmptyState, ErrorState, LoadingBlock } from "@/components/dash/states";
 import { useResource } from "@/components/dash/use-resource";
-import { api, ApiError } from "@/lib/vowly/client";
-import { useProjectApi } from "../project-context";
+import { api, ApiError, type ApiClient } from "@/lib/vowly/client";
+import { useOptionalProjectApi } from "../project-context";
 
 export type Column<T> = { header: string; cell: (row: T) => ReactNode; className?: string };
 export type FilterDef = { name: string; label: string; options: { value: string; label: string }[] };
 
 type Props<T extends { id: string }> = {
-  /** Resource path under the project, e.g. "/guests". */
+  /** Resource path, e.g. "/guests" (under the current project unless `pathOf` is given). */
   resource: string;
   noun: string;
   columns: Column<T>[];
@@ -36,6 +36,10 @@ type Props<T extends { id: string }> = {
   extraActions?: (row: T) => ReactNode;
   toolbar?: ReactNode;
   addLabel?: string;
+  /** Builds the API path for a resource; defaults to the current project's path. Needed outside a project (admin). */
+  pathOf?: (suffix: string) => string;
+  /** Browser client to use; defaults to the project API client. */
+  client?: Pick<ApiClient, "get" | "post" | "put" | "delete">;
 };
 
 export function CrudTable<T extends { id: string }>({
@@ -54,22 +58,32 @@ export function CrudTable<T extends { id: string }>({
   extraActions,
   toolbar,
   addLabel,
+  pathOf,
+  client = api,
 }: Props<T>) {
-  const path = useProjectApi();
+  const projectPath = useOptionalProjectApi();
+  const resolved = pathOf ?? projectPath;
+  if (!resolved) throw new Error("CrudTable needs a project route or a `pathOf` prop");
+  const path: (suffix: string) => string = resolved;
   const feedback = useFeedback();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [filterValues, setFilterValues] = useState<Record<string, string>>({});
   const [editing, setEditing] = useState<T | null | undefined>(undefined); // undefined = closed, null = create
 
-  const { data, meta, error, loading, reload } = useResource<T[]>(path(resource), {
+  const { data, meta, error, loading, reload } = useResource<T[]>(
+    path(resource),
+    {
     page,
     limit: pageSize,
     search: search || undefined,
     ...filterValues,
     ...fixedQuery,
     _r: refreshKey || undefined,
-  });
+  },
+    true,
+    client,
+  );
 
   function changed() {
     reload();
@@ -79,8 +93,8 @@ export function CrudTable<T extends { id: string }>({
   async function save(values: FormValues) {
     const mode = editing ? "update" : "create";
     const body = toPayload(values, mode);
-    if (editing) await api.put(path(`${resource}/${editing.id}`), body);
-    else await api.post(path(resource), body);
+    if (editing) await client.put(path(`${resource}/${editing.id}`), body);
+    else await client.post(path(resource), body);
     feedback.success(editing ? "Perubahan disimpan" : `${noun} ditambahkan`);
     setEditing(undefined);
     changed();
@@ -90,7 +104,7 @@ export function CrudTable<T extends { id: string }>({
     const ok = await feedback.confirm({ title: `Hapus ${noun}?`, description: "Tindakan ini tidak dapat dibatalkan.", confirmLabel: "Hapus", danger: true });
     if (!ok) return;
     try {
-      await api.delete(path(`${resource}/${row.id}`));
+      await client.delete(path(`${resource}/${row.id}`));
       feedback.success(`${noun} dihapus`);
       changed();
     } catch (cause) {

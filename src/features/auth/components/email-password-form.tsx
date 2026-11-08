@@ -6,6 +6,8 @@ import Link from "next/link";
 import { HiExclamationCircle } from "react-icons/hi2";
 import { Button } from "@/components/ui/button";
 import { api, ApiError } from "@/lib/vowly/client";
+import { landingPath } from "@/lib/vowly/safe-next";
+import type { User } from "@/lib/vowly/types";
 import { AuthField } from "./auth-field";
 import { PasswordField } from "./password-field";
 
@@ -22,11 +24,11 @@ export function EmailPasswordForm({ next }: { next: string }) {
     setPending(true);
     setError(undefined);
     try {
-      await api.session("login", {
+      const { data } = await api.session<{ user: User }>("login", {
         email: String(formData.get("email") ?? ""),
         password: String(formData.get("password") ?? ""),
       });
-      router.replace(next);
+      router.replace(landingPath(data.user.role, next));
       router.refresh();
     } catch (cause) {
       setError(cause instanceof ApiError ? cause.message : "Terjadi kesalahan. Coba lagi.");

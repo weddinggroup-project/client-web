@@ -1,58 +1,24 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { serverEnv } from "@/lib/env";
+import type { NextRequest } from "next/server";
 import { errorEnvelope } from "@/lib/vowly/credentials";
-import { isAllowedBackendPath, isSameOrigin } from "@/lib/vowly/proxy-path";
-import { SESSION_COOKIE } from "@/lib/vowly/session-cookie";
+import { forwardToApi } from "@/lib/vowly/forward";
+import { isAllowedBackendPath } from "@/lib/vowly/proxy-path";
 
 export const dynamic = "force-dynamic";
-
-const UPSTREAM_TIMEOUT_MS = 30_000;
 
 type Context = { params: Promise<{ path: string[] }> };
 
 /**
  * Same-origin proxy to the Vowly API. The session JWT lives in an httpOnly cookie, so browser code cannot attach it;
- * this handler adds it server-side. Only plain API paths are forwarded (see isAllowedBackendPath).
+ * the shared forwarder adds it server-side. Only plain API paths are forwarded (see isAllowedBackendPath); the admin
+ * area is deliberately not reachable here (it has its own role-checked route, /api/admin).
  */
-async function forward(request: NextRequest, { params }: Context) {
+async function handle(request: NextRequest, { params }: Context) {
   const { path } = await params;
   if (!isAllowedBackendPath(path)) return errorEnvelope(404, "Data tidak ditemukan");
-
-  if (request.method !== "GET" && !isSameOrigin(request.headers.get("origin"), request.headers.get("host"))) {
-    return errorEnvelope(403, "Permintaan tidak diizinkan");
-  }
-  const token = request.cookies.get(SESSION_COOKIE)?.value;
-  if (!token) return errorEnvelope(401, "Sesi berakhir. Silakan login kembali.");
-
-  const url = new URL(`/api/v1/${path.join("/")}`, serverEnv.API_BASE_URL);
-  url.search = request.nextUrl.search;
-
-  const headers: Record<string, string> = { Authorization: `Bearer ${token}`, Accept: "application/json" };
-  const contentType = request.headers.get("content-type");
-  if (contentType) headers["Content-Type"] = contentType;
-
-  let upstream: Response;
-  try {
-    upstream = await fetch(url, {
-      method: request.method,
-      headers,
-      body: request.method === "GET" || request.method === "HEAD" ? undefined : await request.arrayBuffer(),
-      cache: "no-store",
-      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
-    });
-  } catch {
-    return errorEnvelope(503, "Layanan Vowly tidak dapat dihubungi. Coba lagi sebentar lagi.");
-  }
-
-  const response = new NextResponse(await upstream.arrayBuffer(), {
-    status: upstream.status,
-    headers: { "Content-Type": upstream.headers.get("content-type") ?? "application/json" },
-  });
-  if (upstream.status === 401) response.cookies.set(SESSION_COOKIE, "", { path: "/", maxAge: 0 });
-  return response;
+  return forwardToApi(request, path.join("/"));
 }
 
-export const GET = forward;
-export const POST = forward;
-export const PUT = forward;
-export const DELETE = forward;
+export const GET = handle;
+export const POST = handle;
+export const PUT = handle;
+export const DELETE = handle;

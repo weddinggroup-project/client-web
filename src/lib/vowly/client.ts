@@ -61,13 +61,24 @@ async function send<T>(method: string, url: string, body?: unknown, signal?: Abo
   return { data: envelope.data as T, meta: envelope.meta, message: envelope.message };
 }
 
+function makeClient(base: string) {
+  return {
+    get: <T>(path: string, query?: Query, signal?: AbortSignal) => send<T>("GET", `${base}${path}${toQueryString(query)}`, undefined, signal),
+    post: <T>(path: string, body?: unknown) => send<T>("POST", `${base}${path}`, body ?? {}),
+    put: <T>(path: string, body?: unknown) => send<T>("PUT", `${base}${path}`, body ?? {}),
+    delete: <T = null>(path: string) => send<T>("DELETE", `${base}${path}`),
+    upload: <T>(path: string, form: FormData) => send<T>("POST", `${base}${path}`, form),
+  };
+}
+
+export type ApiClient = ReturnType<typeof makeClient>;
+
 /** Browser API client. All calls go through the same-origin proxy, which adds the session token. */
 export const api = {
-  get: <T>(path: string, query?: Query, signal?: AbortSignal) => send<T>("GET", `${BASE}${path}${toQueryString(query)}`, undefined, signal),
-  post: <T>(path: string, body?: unknown) => send<T>("POST", `${BASE}${path}`, body ?? {}),
-  put: <T>(path: string, body?: unknown) => send<T>("PUT", `${BASE}${path}`, body ?? {}),
-  delete: <T = null>(path: string) => send<T>("DELETE", `${BASE}${path}`),
-  upload: <T>(path: string, form: FormData) => send<T>("POST", `${BASE}${path}`, form),
+  ...makeClient(BASE),
   /** Credential endpoints that set or clear the session cookie. */
   session: <T>(action: "login" | "register" | "logout", body?: unknown) => send<T>("POST", `/api/session/${action}`, body ?? {}),
 };
+
+/** Admin-area client (`/api/admin/*`, role-checked on the server). Paths are relative to `/api/v1/admin`. */
+export const adminApi: ApiClient = makeClient("/api/admin");

@@ -6,3 +6,11 @@ export function safeNext(next: string | string[] | undefined, fallback = "/dashb
   }
   return value;
 }
+
+/**
+ * Where to send someone after sign-in. An explicit return path wins; otherwise admins land in the admin area and
+ * everyone else in the planner dashboard.
+ */
+export function landingPath(role: string, next: string): string {
+  return next === "/dashboard" && role === "admin" ? "/admin" : next;
+}

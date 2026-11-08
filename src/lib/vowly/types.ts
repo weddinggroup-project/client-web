@@ -35,6 +35,18 @@ export type User = {
 // ---- catalog and orders ----
 export type Package = { id: string; code: string; name: string; price: number; features: string[]; is_active: boolean };
 export type Template = { id: string; slug: string; name: string; preview_url: string; sort_order: number; is_active: boolean };
+export type AdminVoucher = {
+  id: string;
+  code: string;
+  kind: "voucher" | "referral";
+  discount_type: "fixed" | "percent";
+  amount: number;
+  quota: number | null;
+  used_count: number;
+  valid_from: string | null;
+  valid_until: string | null;
+  is_active: boolean;
+};
 export type ValidatedCode = { code: string; kind: "voucher" | "referral"; amount: number };
 export type OrderDiscount = { kind: "voucher" | "referral"; code: string; amount: number };
 export type OrderStatus = "pending" | "paid" | "expired" | "cancelled";

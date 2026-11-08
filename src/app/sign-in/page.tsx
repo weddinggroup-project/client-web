@@ -4,7 +4,7 @@ import Link from "next/link";
 import { EmailPasswordForm } from "@/features/auth/components/email-password-form";
 import { AuthLogo } from "@/features/auth/components/auth-logo";
 import { getSession } from "@/lib/vowly/server";
-import { safeNext } from "@/lib/vowly/safe-next";
+import { landingPath, safeNext } from "@/lib/vowly/safe-next";
 
 const heroImage = {
   src: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=1400&auto=format&fit=crop",
@@ -20,7 +20,7 @@ export default async function SignInPage({
   const session = await getSession();
 
   if (session) {
-    redirect(next);
+    redirect(landingPath(session.role, next));
   }
 
   return (

@@ -6,11 +6,14 @@
 const SEGMENT = /^[A-Za-z0-9._-]+$/;
 const BLOCKED_PREFIXES = ["auth/login", "auth/register", "admin", "webhooks"];
 
-export function isAllowedBackendPath(segments: string[]): boolean {
+/** Plain, bounded path segments only: no dots-only segments, encodings, or separators. */
+export function hasSafeSegments(segments: string[]): boolean {
   if (segments.length === 0 || segments.length > 8) return false;
-  for (const segment of segments) {
-    if (!SEGMENT.test(segment) || segment === "." || segment === "..") return false;
-  }
+  return segments.every((segment) => SEGMENT.test(segment) && segment !== "." && segment !== "..");
+}
+
+export function isAllowedBackendPath(segments: string[]): boolean {
+  if (!hasSafeSegments(segments)) return false;
   const joined = segments.join("/").toLowerCase();
   return !BLOCKED_PREFIXES.some((prefix) => joined === prefix || joined.startsWith(`${prefix}/`));
 }

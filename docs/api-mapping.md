@@ -21,6 +21,18 @@ Path di bawah `/api/v1`. `{id}` = proyek (undangan). Dashboard terkunci (403) sa
 | Wizard `/undangan-digital/pesan` | `wizard/order-wizard.tsx` | `GET /packages`, `/templates`, `GET /invitations/subdomain-check`, `POST /invitations`, `PUT /invitations/{id}`, `POST /collaborators`, `POST /vouchers/validate`, `GET/POST /orders`, `GET /invitations/{id}/orders`, `GET /orders/{id}` | hanya `mandiri_va`; metode lain tampil nonaktif; paket/template/harga dari API |
 | Terima kolaborasi `/kolaborasi/terima` | `collaboration/accept-form.tsx` | `POST /collaborations/accept` | email akun harus sama dengan email undangan; gagal selalu 404 |
 
+## Area admin (`/admin`)
+
+| Layar | Komponen | Endpoint (via `/api/admin`) |
+| --- | --- | --- |
+| Ringkasan | `admin/admin-views.tsx` `AdminOverview` | `GET /users`, `/packages`, `/templates`, `/vouchers` (hanya `meta.total`) |
+| Pengguna | `UsersAdmin` | `/users` CRUD; password wajib saat buat, kosong saat ubah = tidak diganti |
+| Paket | `PackagesAdmin` | `/packages` CRUD; fitur satu per baris |
+| Template | `TemplatesAdmin` | `/templates` CRUD |
+| Voucher | `VouchersAdmin` | `/vouchers` CRUD; tanggal dikirim sebagai RFC 3339 UTC; menghapus yang sudah dipakai ditolak API (400) |
+
+Admin tidak punya endpoint daftar pesanan/pendapatan di API, jadi ringkasan hanya menampilkan jumlah data.
+
 ## Pemetaan akses wizard → modul API
 
 | Label Figma | Modul API (izin) |

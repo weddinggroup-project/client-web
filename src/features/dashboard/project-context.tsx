@@ -27,3 +27,9 @@ export function useProjectApi() {
   const { project } = useProject();
   return (suffix: string) => `/invitations/${project.id}${suffix}`;
 }
+
+/** Like `useProjectApi` but returns null outside a project route (used by tables that are also shown in the admin area). */
+export function useOptionalProjectApi(): ((suffix: string) => string) | null {
+  const value = useContext(ProjectContext);
+  return value ? (suffix: string) => `/invitations/${value.project.id}${suffix}` : null;
+}
