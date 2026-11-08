@@ -5,38 +5,33 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { HiExclamationCircle } from "react-icons/hi2";
 import { Button } from "@/components/ui/button";
+import { api, ApiError } from "@/lib/vowly/client";
 import { AuthField } from "./auth-field";
 import { PasswordField } from "./password-field";
 
-const dummyAdmin = {
-  email: "admin@gmail.com",
-  password: "Admin123",
-};
-
-export function EmailPasswordForm({ enabled }: { enabled: boolean }) {
+export function EmailPasswordForm({ next }: { next: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!enabled || pending) return;
+    if (pending) return;
 
     const formData = new FormData(event.currentTarget);
-    const email = String(formData.get("email") ?? "");
-    const password = String(formData.get("password") ?? "");
-
     setPending(true);
     setError(undefined);
-
-    if (email !== dummyAdmin.email || password !== dummyAdmin.password) {
+    try {
+      await api.session("login", {
+        email: String(formData.get("email") ?? ""),
+        password: String(formData.get("password") ?? ""),
+      });
+      router.replace(next);
+      router.refresh();
+    } catch (cause) {
+      setError(cause instanceof ApiError ? cause.message : "Terjadi kesalahan. Coba lagi.");
       setPending(false);
-      setError("Email atau password tidak valid.");
-      return;
     }
-
-    router.replace("/dashboard");
-    router.refresh();
   }
 
   return (
@@ -48,7 +43,6 @@ export function EmailPasswordForm({ enabled }: { enabled: boolean }) {
         type="email"
         required
         autoComplete="email"
-        defaultValue={dummyAdmin.email}
         placeholder="nama@email.com"
       />
 
@@ -57,9 +51,7 @@ export function EmailPasswordForm({ enabled }: { enabled: boolean }) {
         id="password"
         name="password"
         required
-        minLength={8}
         autoComplete="current-password"
-        defaultValue={dummyAdmin.password}
         placeholder="Masukkan password"
         labelAside={
           <Link
@@ -82,7 +74,7 @@ export function EmailPasswordForm({ enabled }: { enabled: boolean }) {
         type="submit"
         variant="rose"
         className="h-12 w-full px-8"
-        disabled={!enabled || pending}
+        disabled={pending}
       >
         {pending ? "Memproses..." : "Login"}
       </Button>

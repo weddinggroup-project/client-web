@@ -3,18 +3,24 @@ import Image from "next/image";
 import Link from "next/link";
 import { SignUpForm } from "@/features/auth/components/sign-up-form";
 import { AuthLogo } from "@/features/auth/components/auth-logo";
-import { getSession } from "@/lib/auth/session";
+import { getSession } from "@/lib/vowly/server";
+import { safeNext } from "@/lib/vowly/safe-next";
 
 const backgroundImage = {
   src: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1920&auto=format&fit=crop",
   alt: "Perayaan pernikahan di area outdoor yang rindang",
 };
 
-export default async function SignUpPage() {
+export default async function SignUpPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string | string[] }>;
+}) {
+  const next = safeNext((await searchParams).next);
   const session = await getSession();
 
   if (session) {
-    redirect("/dashboard");
+    redirect(next);
   }
 
   return (
@@ -51,13 +57,13 @@ export default async function SignUpPage() {
             </p>
 
             <div className="mt-6">
-              <SignUpForm />
+              <SignUpForm next={next} />
             </div>
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
               Sudah memiliki akun?{" "}
               <Link
-                href="/sign-in"
+                href={next === "/dashboard" ? "/sign-in" : `/sign-in?next=${encodeURIComponent(next)}`}
                 className="font-semibold text-primary hover:text-primary-hover"
               >
                 Login di sini

@@ -5,26 +5,28 @@ import { HiOutlineHeart, HiOutlinePlus } from "react-icons/hi2";
 import { Button } from "@/components/ui/button";
 import { WizardTopBar } from "./wizard-top-bar";
 import { InviteCollaboratorModal } from "./invite-collaborator-modal";
-import type { Collaborator } from "./order-wizard";
+import type { Collaborator, InviteInput } from "./order-wizard";
 
 type StepCollaborationProps = {
   collaborators: Collaborator[];
-  onAddCollaborator: (collaborator: Collaborator) => void;
+  /** Resolves to an error message, or undefined when the invitation was created. */
+  onInvite: (input: InviteInput) => Promise<string | undefined>;
   onBack: () => void;
   onNext: () => void;
 };
 
 export function StepCollaboration({
   collaborators,
-  onAddCollaborator,
+  onInvite,
   onBack,
   onNext,
 }: StepCollaborationProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  function handleInvite(collaborator: Collaborator) {
-    onAddCollaborator(collaborator);
-    setIsModalOpen(false);
+  async function handleInvite(input: InviteInput) {
+    const problem = await onInvite(input);
+    if (!problem) setIsModalOpen(false);
+    return problem;
   }
 
   return (
@@ -61,6 +63,11 @@ export function StepCollaboration({
                   <p className="truncate text-xs text-muted-foreground">
                     {collaborator.email}
                   </p>
+                  {collaborator.token ? (
+                    <p className="mt-1 break-all font-mono text-[11px] text-foreground/70">
+                      Token (tampil sekali, bagikan sendiri): {collaborator.token}
+                    </p>
+                  ) : null}
                 </div>
               </li>
             ))}

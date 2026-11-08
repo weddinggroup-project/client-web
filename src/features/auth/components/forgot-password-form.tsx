@@ -13,11 +13,7 @@ export function ForgotPasswordForm() {
     event.preventDefault();
     if (pending) return;
 
-    setPending(true);
-
-    // This starter doesn't wire password recovery to a real backend yet —
-    // we simulate the request being sent successfully.
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    // The API has no password recovery yet, so be explicit instead of pretending an email was sent.
     setPending(false);
     setIsSuccess(true);
   }
@@ -26,9 +22,9 @@ export function ForgotPasswordForm() {
     return (
       <div className="flex flex-col items-center gap-3 py-4 text-center">
         <HiCheckCircle className="size-10 text-success" aria-hidden="true" />
-        <p className="font-semibold text-foreground">Instruksi terkirim!</p>
+        <p className="font-semibold text-foreground">Pemulihan mandiri belum tersedia</p>
         <p className="text-sm text-muted-foreground">
-          Cek email atau SMS kamu untuk melanjutkan pemulihan akun.
+          Fitur pemulihan kata sandi sedang disiapkan. Hubungi tim Vowly untuk mengatur ulang akun Anda.
         </p>
       </div>
     );

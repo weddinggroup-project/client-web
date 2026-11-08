@@ -34,6 +34,16 @@
 
   --color-accent: #a97078;
 
+  /* Dashboard palette (Figma "Dashboard Revisi"): cream canvas, gold and blush accents, warm ink. */
+  --font-dash: var(--font-dm-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-cream: #faf6ee;
+  --color-gold: #e8e0ba;
+  --color-gold-foreground: #635f40;
+  --color-blush: #f4c2c2;
+  --color-blush-foreground: #734e4e;
+  --color-ink: #1c1c18;
+  --color-ink-soft: #504444;
+
   --color-success: #16a34a;
   --color-warning: #d97706;
   --color-error: #dc2626;

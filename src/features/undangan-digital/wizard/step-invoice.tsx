@@ -1,14 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HiCheck, HiOutlineClipboardDocument } from "react-icons/hi2";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { WizardTopBar } from "./wizard-top-bar";
-import { packages, formatRupiah } from "./wizard-data";
+import { api } from "@/lib/vowly/client";
+import type { Order } from "@/lib/vowly/types";
+import { formatRupiah } from "./wizard-data";
 
-const virtualAccountNumber = "8801 2345 6789 0123";
+const POLL_MS = 5000;
+
+/** "23 jam 59 menit" until `expiresAt`, or null once it has passed. */
+export function remainingLabel(expiresAt: string, now: number): string | null {
+  const ms = new Date(expiresAt).getTime() - now;
+  if (Number.isNaN(ms) || ms <= 0) return null;
+  const minutes = Math.floor(ms / 60_000);
+  return `${Math.floor(minutes / 60)} jam ${minutes % 60} menit`;
+}
+
+/** VA numbers are shown in groups of four. */
+export function groupVa(va: string): string {
+  return va.replace(/\s/g, "").replace(/(.{4})/g, "$1 ").trim();
+}
 
 const transferTabs = [
   { id: "mbanking", label: "Petunjuk Transfer M-Banking" },
@@ -42,17 +57,33 @@ const successSteps = [
 ];
 
 type StepInvoiceProps = {
-  packageId: string;
+  order: Order;
+  packageName?: string;
+  onOrderChange: (order: Order) => void;
   onBack: () => void;
   onFinish: () => void;
 };
 
-export function StepInvoice({ packageId, onBack, onFinish }: StepInvoiceProps) {
-  const selectedPackage = packages.find((pkg) => pkg.id === packageId) ?? packages[0]!;
+export function StepInvoice({ order, packageName, onOrderChange, onBack, onFinish }: StepInvoiceProps) {
+  const virtualAccountNumber = groupVa(order.payment?.va_number ?? "");
+  const [now, setNow] = useState(() => Date.now());
   const [activeTab, setActiveTab] = useState<(typeof transferTabs)[number]["id"]>(
     "mbanking",
   );
   const [isCopied, setIsCopied] = useState(false);
+
+  // Poll the order while it waits for payment; the gateway marks it paid via webhook.
+  useEffect(() => {
+    if (order.status !== "pending") return;
+    const timer = setInterval(() => {
+      setNow(Date.now());
+      api
+        .get<Order>(`/orders/${order.id}`)
+        .then((response) => onOrderChange(response.data))
+        .catch(() => undefined); // transient errors: try again on the next tick
+    }, POLL_MS);
+    return () => clearInterval(timer);
+  }, [order.id, order.status, onOrderChange]);
 
   async function handleCopy() {
     try {
@@ -103,13 +134,26 @@ export function StepInvoice({ packageId, onBack, onFinish }: StepInvoiceProps) {
           <div className="mt-4 flex items-center justify-between text-sm">
             <span className="text-foreground/80">Total Pembayaran</span>
             <span className="font-semibold text-primary">
-              {formatRupiah(selectedPackage.price)}
+              {formatRupiah(order.total)}
             </span>
           </div>
 
-          <p className="mt-3 rounded-lg bg-warning/10 px-3 py-2 text-xs text-warning">
-            Pembayaran berakhir dalam 23 jam 59 menit
-          </p>
+          {packageName ? <p className="mt-1 text-xs text-muted-foreground">Paket {packageName}</p> : null}
+          {order.status === "paid" ? (
+            <p role="status" className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+              Pembayaran diterima. Dashboard Wedding Planner Anda sudah terbuka.
+            </p>
+          ) : order.status === "pending" && order.payment ? (
+            <p className="mt-3 rounded-lg bg-warning/10 px-3 py-2 text-xs text-warning">
+              {remainingLabel(order.payment.expires_at, now)
+                ? `Pembayaran berakhir dalam ${remainingLabel(order.payment.expires_at, now)}`
+                : "Waktu pembayaran habis. Status akan diperbarui."}
+            </p>
+          ) : (
+            <p role="alert" className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">
+              Pesanan {order.status === "expired" ? "kedaluwarsa" : "dibatalkan"}. Kembali untuk membuat pesanan baru.
+            </p>
+          )}
         </Card>
 
         <div className="mt-6 flex rounded-full border border-border p-1">
@@ -138,9 +182,9 @@ export function StepInvoice({ packageId, onBack, onFinish }: StepInvoiceProps) {
           type="button"
           variant="rose"
           className="mt-8 h-12 w-full px-8"
-          onClick={onFinish}
+          onClick={order.status === "paid" ? onFinish : onBack}
         >
-          Selesai
+          {order.status === "paid" ? "Buka Dashboard" : order.status === "pending" ? "Kembali" : "Buat pesanan baru"}
         </Button>
       </div>
     </div>

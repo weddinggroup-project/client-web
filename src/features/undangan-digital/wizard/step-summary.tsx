@@ -6,10 +6,18 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { WizardTopBar } from "./wizard-top-bar";
-import { packages, paymentMethods, formatRupiah } from "./wizard-data";
+import type { ValidatedCode } from "@/lib/vowly/types";
+import { paymentMethods, formatRupiah } from "./wizard-data";
+
+/** Only Mandiri Virtual Account is supported by the API today (PRD Q4); other methods are shown disabled. */
+const SUPPORTED_METHOD = "Mandiri";
 
 type StepSummaryProps = {
-  packageId: string;
+  packageName: string;
+  packagePrice: number;
+  codes: { voucher?: ValidatedCode; referral?: ValidatedCode };
+  onApplyCode: (kind: "voucher" | "referral", code: string) => Promise<string | undefined>;
+  busy: boolean;
   selectedPaymentMethod: string | null;
   onSelectPaymentMethod: (method: string) => void;
   onBack: () => void;
@@ -17,15 +25,27 @@ type StepSummaryProps = {
 };
 
 export function StepSummary({
-  packageId,
+  packageName,
+  packagePrice,
+  codes,
+  onApplyCode,
+  busy,
   selectedPaymentMethod,
   onSelectPaymentMethod,
   onBack,
   onNext,
 }: StepSummaryProps) {
-  const selectedPackage = packages.find((pkg) => pkg.id === packageId) ?? packages[0]!;
   const [voucherCode, setVoucherCode] = useState("");
   const [referralCode, setReferralCode] = useState("");
+  const [codeError, setCodeError] = useState<string>();
+  // Display only: the order total is computed by the API when the order is created.
+  const discount = (codes.voucher?.amount ?? 0) + (codes.referral?.amount ?? 0);
+  const estimatedTotal = Math.max(packagePrice - discount, 0);
+
+  async function apply(kind: "voucher" | "referral", code: string) {
+    if (!code.trim()) return;
+    setCodeError(await onApplyCode(kind, code));
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,15 +67,27 @@ export function StepSummary({
           <div className="mt-4 flex items-center justify-between text-sm">
             <span className="text-foreground/80">Nama Paket</span>
             <span className="font-semibold text-foreground">
-              {selectedPackage.name}
+              {packageName}
             </span>
           </div>
           <div className="mt-1 flex items-center justify-between text-sm">
             <span className="text-foreground/80">Harga</span>
             <span className="font-semibold text-foreground">
-              {formatRupiah(selectedPackage.price)}
+              {formatRupiah(packagePrice)}
             </span>
           </div>
+          {codes.voucher ? (
+            <div className="mt-1 flex items-center justify-between text-sm text-emerald-700">
+              <span>Voucher {codes.voucher.code}</span>
+              <span>-{formatRupiah(codes.voucher.amount)}</span>
+            </div>
+          ) : null}
+          {codes.referral ? (
+            <div className="mt-1 flex items-center justify-between text-sm text-emerald-700">
+              <span>Referral {codes.referral.code}</span>
+              <span>-{formatRupiah(codes.referral.amount)}</span>
+            </div>
+          ) : null}
 
           <div className="mt-5 flex gap-2">
             <Input
@@ -64,7 +96,7 @@ export function StepSummary({
               placeholder="Masukkan Kode Voucher"
               className="h-10 flex-1 rounded-lg text-sm"
             />
-            <Button type="button" variant="outline-brand" className="h-10 px-4 text-xs">
+            <Button type="button" variant="outline-brand" className="h-10 px-4 text-xs" onClick={() => void apply("voucher", voucherCode)}>
               Gunakan
             </Button>
           </div>
@@ -76,10 +108,16 @@ export function StepSummary({
               placeholder="Masukkan Kode Referral"
               className="h-10 flex-1 rounded-lg text-sm"
             />
-            <Button type="button" variant="outline-brand" className="h-10 px-4 text-xs">
+            <Button type="button" variant="outline-brand" className="h-10 px-4 text-xs" onClick={() => void apply("referral", referralCode)}>
               Gunakan
             </Button>
           </div>
+
+          {codeError ? (
+            <p role="alert" className="mt-2 text-xs text-red-700">
+              {codeError}
+            </p>
+          ) : null}
 
           <p className="mt-6 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
             Metode Pembayaran
@@ -93,7 +131,10 @@ export function StepSummary({
                   key={method.label}
                   type="button"
                   onClick={() => onSelectPaymentMethod(method.label)}
+                  disabled={method.label !== SUPPORTED_METHOD}
+                  title={method.label === SUPPORTED_METHOD ? undefined : "Segera hadir"}
                   className={cn(
+                    "disabled:cursor-not-allowed disabled:opacity-40",
                     "flex items-center gap-1.5 rounded-lg border border-card-border bg-background px-2 py-2 text-xs font-medium text-foreground/80 transition",
                     isSelected && "border-primary ring-2 ring-primary/30",
                   )}
@@ -112,19 +153,20 @@ export function StepSummary({
           <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
             <span className="font-semibold text-foreground">Total</span>
             <span className="text-lg font-bold text-primary">
-              {formatRupiah(selectedPackage.price)}
+              {formatRupiah(estimatedTotal)}
             </span>
           </div>
+          <p className="mt-1 text-right text-[11px] text-muted-foreground">Total akhir dihitung sistem saat pesanan dibuat.</p>
         </Card>
 
         <Button
           type="button"
           variant="rose"
           className="mt-6 h-12 w-full px-8"
-          disabled={!selectedPaymentMethod}
+          disabled={selectedPaymentMethod !== SUPPORTED_METHOD || busy}
           onClick={onNext}
         >
-          Bayar Sekarang
+          {busy ? "Memproses…" : "Bayar Sekarang"}
         </Button>
       </div>
     </div>

@@ -1,11 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { DM_Sans, Inter, Playfair_Display } from "next/font/google";
 import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
   display: "swap",
 });
 
@@ -50,7 +56,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id" className={`${inter.variable} ${playfairDisplay.variable}`}>
+    <html lang="id" className={`${inter.variable} ${playfairDisplay.variable} ${dmSans.variable}`}>
       <body>{children}</body>
     </html>
   );

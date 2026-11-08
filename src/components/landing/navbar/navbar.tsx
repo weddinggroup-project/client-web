@@ -1,4 +1,4 @@
-import { getSession } from "@/lib/auth/session";
+import { getSession } from "@/lib/vowly/server";
 import { NavbarClient } from "./navbar-client";
 
 export async function Navbar() {

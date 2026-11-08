@@ -5,10 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { HiCheckCircle, HiExclamationCircle } from "react-icons/hi2";
 import { Button } from "@/components/ui/button";
+import { api, ApiError } from "@/lib/vowly/client";
 import { AuthField } from "./auth-field";
 import { PasswordField } from "./password-field";
 
-export function SignUpForm() {
+export function SignUpForm({ next }: { next: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
@@ -36,16 +37,19 @@ export function SignUpForm() {
     }
 
     setPending(true);
-
-    // This starter doesn't wire registration to a real backend yet — we
-    // simulate a successful sign-up and hand the user back to Login.
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    setPending(false);
-    setIsSuccess(true);
-
-    setTimeout(() => {
-      router.push("/sign-in");
-    }, 1500);
+    try {
+      await api.session("register", {
+        name: String(formData.get("name") ?? ""),
+        email: String(formData.get("email") ?? ""),
+        password,
+      });
+      setIsSuccess(true);
+      router.replace(next);
+      router.refresh();
+    } catch (cause) {
+      setError(cause instanceof ApiError ? cause.message : "Terjadi kesalahan. Coba lagi.");
+      setPending(false);
+    }
   }
 
   if (isSuccess) {
@@ -54,7 +58,7 @@ export function SignUpForm() {
         <HiCheckCircle className="size-10 text-success" aria-hidden="true" />
         <p className="font-semibold text-foreground">Akun berhasil dibuat!</p>
         <p className="text-sm text-muted-foreground">
-          Mengarahkan kamu ke halaman login...
+          Mengarahkan kamu...
         </p>
       </div>
     );
@@ -62,6 +66,17 @@ export function SignUpForm() {
 
   return (
     <form className="space-y-5" onSubmit={onSubmit}>
+      <AuthField
+        label="Nama Lengkap"
+        id="name"
+        name="name"
+        required
+        minLength={2}
+        maxLength={120}
+        autoComplete="name"
+        placeholder="Nama sesuai identitas"
+      />
+
       <AuthField
         label="Alamat Email"
         id="email"
@@ -90,16 +105,6 @@ export function SignUpForm() {
         minLength={8}
         autoComplete="new-password"
         placeholder="Ulangi kata sandi"
-      />
-
-      <AuthField
-        label="Nomor Telepon"
-        id="phone"
-        name="phone"
-        type="tel"
-        required
-        autoComplete="tel"
-        placeholder="08xxxxxxxxxx"
       />
 
       <label className="flex items-start gap-2.5 text-sm text-muted-foreground">

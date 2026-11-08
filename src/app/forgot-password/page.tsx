@@ -3,7 +3,7 @@ import Link from "next/link";
 import { HiArrowLeft } from "react-icons/hi2";
 import { ForgotPasswordForm } from "@/features/auth/components/forgot-password-form";
 import { AuthLogo } from "@/features/auth/components/auth-logo";
-import { getSession } from "@/lib/auth/session";
+import { getSession } from "@/lib/vowly/server";
 
 export default async function ForgotPasswordPage() {
   const session = await getSession();

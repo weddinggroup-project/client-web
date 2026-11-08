@@ -5,11 +5,11 @@ import { HiOutlineXMark } from "react-icons/hi2";
 import { Button } from "@/components/ui/button";
 import { AuthField } from "@/features/auth/components/auth-field";
 import { collaboratorAccessOptions, collaboratorRoles } from "./wizard-data";
-import type { Collaborator } from "./order-wizard";
+import type { InviteInput } from "./order-wizard";
 
 type InviteCollaboratorModalProps = {
   onClose: () => void;
-  onInvite: (collaborator: Collaborator) => void;
+  onInvite: (input: InviteInput) => Promise<string | undefined>;
 };
 
 export function InviteCollaboratorModal({
@@ -19,6 +19,8 @@ export function InviteCollaboratorModal({
   const [email, setEmail] = useState("");
   const [role, setRole] = useState(collaboratorRoles[0]!.value);
   const [accessList, setAccessList] = useState<string[]>([]);
+  const [error, setError] = useState<string>();
+  const [pending, setPending] = useState(false);
 
   function toggleAccess(option: string) {
     setAccessList((current) =>
@@ -28,11 +30,17 @@ export function InviteCollaboratorModal({
     );
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!email) return;
+    if (!email || pending) return;
 
-    onInvite({ name: email.split("@")[0] ?? email, email });
+    setPending(true);
+    setError(undefined);
+    const problem = await onInvite({ email: email.trim(), role, accessList });
+    if (problem) {
+      setError(problem);
+      setPending(false);
+    }
   }
 
   return (
@@ -112,12 +120,18 @@ export function InviteCollaboratorModal({
             </div>
           </div>
 
+          {error ? (
+            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              {error}
+            </p>
+          ) : null}
+
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={onClose}>
               Tutup
             </Button>
-            <Button type="submit" variant="rose">
-              Kirim Undangan
+            <Button type="submit" variant="rose" disabled={pending}>
+              {pending ? "Mengirim…" : "Kirim Undangan"}
             </Button>
           </div>
         </form>
