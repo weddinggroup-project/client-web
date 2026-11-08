@@ -58,3 +58,17 @@ test("order wizard shows the packages and prices served by the API", async ({ pa
   await expect(page.getByText("Rp. 350.000")).toBeVisible();
   await expect(page.getByText("Terpopuler")).toBeVisible();
 });
+
+test("sign out from the sidebar asks for confirmation and ends the session", async ({ page }) => {
+  await page.goto(`/dashboard/${projectId}`);
+  await page.getByRole("button", { name: "Keluar" }).first().click();
+  // Cancel keeps the user signed in.
+  await page.getByRole("button", { name: "Batal" }).click();
+  await expect(page).toHaveURL(new RegExp(`/dashboard/${projectId}$`));
+
+  await page.getByRole("button", { name: "Keluar" }).first().click();
+  await page.getByRole("alertdialog").or(page.getByRole("dialog")).getByRole("button", { name: "Keluar" }).click();
+  await page.waitForURL(/\/sign-in/);
+  await page.goto(`/dashboard/${projectId}`);
+  await expect(page).toHaveURL(/\/sign-in/);
+});

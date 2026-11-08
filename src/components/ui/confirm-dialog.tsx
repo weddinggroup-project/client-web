@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertCircle, X } from "lucide-react";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
 type ConfirmDialogProps = {
   open: boolean;
@@ -24,6 +24,7 @@ export function ConfirmDialog({
   onConfirm,
   onClose,
 }: ConfirmDialogProps) {
+  const titleId = useId();
   if (!open) return null;
 
   const confirmClass =
@@ -38,13 +39,13 @@ export function ConfirmDialog({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <section className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl shadow-neutral-900/20">
+      <section role="alertdialog" aria-modal="true" aria-labelledby={titleId} className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl shadow-neutral-900/20">
         <div className="flex items-start gap-3">
           <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-rose-50 text-rose-600">
             <AlertCircle className="size-5" aria-hidden />
           </span>
           <div>
-            <h2 className="text-lg font-semibold text-neutral-950">{title}</h2>
+            <h2 id={titleId} className="text-lg font-semibold text-neutral-950">{title}</h2>
             <div className="mt-1 text-sm leading-6 text-neutral-500">
               {description}
             </div>
@@ -52,7 +53,7 @@ export function ConfirmDialog({
           <button
             type="button"
             className="ml-auto text-neutral-400 transition hover:text-neutral-700"
-            aria-label="Close confirmation"
+            aria-label="Tutup"
             onClick={onClose}
           >
             <X className="size-5" aria-hidden />

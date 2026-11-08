@@ -2,10 +2,10 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { HiChevronDown, HiOutlineArrowRightOnRectangle } from "react-icons/hi2";
 import { AppShell, Breadcrumbs } from "@/components/dash/app-shell";
-import { api } from "@/lib/vowly/client";
+import { LogoutButton } from "@/components/dash/logout-button";
 import { initials } from "@/lib/vowly/format";
 import { cn } from "@/lib/utils";
 import { countdownLabel, isActive, navSections, projectHref } from "./nav";
@@ -50,20 +50,8 @@ function Sidebar({ projectId, onNavigate }: { projectId: string; onNavigate?: ()
 }
 
 function UserMenu() {
-  const router = useRouter();
   const { user, project } = useProject();
   const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
-
-  async function logout() {
-    setPending(true);
-    try {
-      await api.session("logout");
-    } finally {
-      router.replace("/sign-in");
-      router.refresh();
-    }
-  }
 
   return (
     <div className="relative">
@@ -93,16 +81,10 @@ function UserMenu() {
               Panel admin
             </Link>
           ) : null}
-          <button
-            type="button"
-            role="menuitem"
-            disabled={pending}
-            onClick={logout}
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
-          >
+          <LogoutButton className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-700 hover:bg-red-50 disabled:opacity-50">
             <HiOutlineArrowRightOnRectangle className="size-4" aria-hidden />
-            {pending ? "Keluar…" : "Keluar"}
-          </button>
+            Keluar
+          </LogoutButton>
         </div>
       ) : null}
     </div>
@@ -125,6 +107,12 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       user={<UserMenu />}
       breadcrumbs={<Breadcrumbs items={crumbs} />}
       renderNav={(onNavigate) => <Sidebar projectId={project.id} onNavigate={onNavigate} />}
+      sidebarFooter={
+        <LogoutButton className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-50">
+          <HiOutlineArrowRightOnRectangle className="size-5 shrink-0" aria-hidden />
+          Keluar
+        </LogoutButton>
+      }
     >
       {children}
     </AppShell>

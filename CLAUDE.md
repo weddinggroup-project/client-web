@@ -14,6 +14,7 @@ checkout API tetapi di-ignore oleh repo API.
 - Autentikasi lewat API (JWT di cookie httpOnly `vowly_token`, pola BFF). Better Auth sudah dihapus.
 - Dashboard `/dashboard/[projectId]/…`: Home, Persiapan, Budget, Guest List, Checklist, Dokumen, Vendor, Undangan
   (template, kirim WhatsApp, kolaborator), AI Assistant, Profile — semuanya memakai endpoint API M1–M6.
+- Logout: tombol "Keluar" di dasar sidebar (user dan admin), menu pengguna, dan kartu Keamanan Akun di Profile; semuanya lewat `LogoutButton` dengan dialog konfirmasi.
 - Area admin `/admin` (hanya `role=admin`; user biasa dialihkan ke `/dashboard`): Ringkasan, Pengguna, Paket, Template, Voucher lewat `/api/admin/*`. Login admin mendarat di `/admin`.
 - Wizard `/undangan-digital/pesan`: paket → detail → lokasi → kolaborasi → template → rincian (voucher/referral) →
   invoice Virtual Account dengan polling status. `/kolaborasi/terima` untuk token undangan.

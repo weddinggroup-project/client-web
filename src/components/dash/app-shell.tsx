@@ -38,6 +38,7 @@ export function AppShell({
   user,
   breadcrumbs,
   renderNav,
+  sidebarFooter,
   children,
 }: {
   homeHref: string;
@@ -46,6 +47,8 @@ export function AppShell({
   user: ReactNode;
   breadcrumbs: ReactNode;
   renderNav: (onNavigate?: () => void) => ReactNode;
+  /** Pinned to the bottom of the sidebar (e.g. the sign-out button). */
+  sidebarFooter?: ReactNode;
   children: ReactNode;
 }) {
   const [drawer, setDrawer] = useState(false);
@@ -66,26 +69,28 @@ export function AppShell({
     <FeedbackProvider>
       <div className="min-h-screen bg-cream font-dash text-ink">
         {!collapsed ? (
-          <aside className="fixed inset-y-0 left-0 z-20 hidden w-[260px] border-r border-gold/40 bg-white lg:block">
+          <aside className="fixed inset-y-0 left-0 z-20 hidden w-[260px] flex-col border-r border-gold/40 bg-white lg:flex">
             <div className="flex h-16 items-center justify-between border-b border-gold/40 px-5">
               {brand}
               {badge ? <span className="rounded-full bg-gold/60 px-3 py-1 text-xs font-semibold text-gold-foreground">{badge}</span> : null}
             </div>
-            <div className="h-[calc(100%-4rem)] overflow-y-auto">{renderNav()}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto">{renderNav()}</div>
+            {sidebarFooter ? <div className="border-t border-gold/40 p-3">{sidebarFooter}</div> : null}
           </aside>
         ) : null}
 
         {drawer ? (
           <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
             <button type="button" aria-label="Tutup menu" className="absolute inset-0 bg-ink/30" onClick={() => setDrawer(false)} />
-            <div className="absolute inset-y-0 left-0 w-72 bg-white shadow-2xl">
+            <div className="absolute inset-y-0 left-0 flex w-72 flex-col bg-white shadow-2xl">
               <div className="flex h-16 items-center justify-between border-b border-gold/40 px-5">
                 {brand}
                 <button type="button" aria-label="Tutup menu" onClick={() => setDrawer(false)}>
                   <HiXMark className="size-6" aria-hidden />
                 </button>
               </div>
-              <div className="h-[calc(100%-4rem)] overflow-y-auto">{renderNav(() => setDrawer(false))}</div>
+              <div className="min-h-0 flex-1 overflow-y-auto">{renderNav(() => setDrawer(false))}</div>
+              {sidebarFooter ? <div className="border-t border-gold/40 p-3">{sidebarFooter}</div> : null}
             </div>
           </div>
         ) : null}

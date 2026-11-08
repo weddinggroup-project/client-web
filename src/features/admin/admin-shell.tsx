@@ -2,11 +2,11 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { HiOutlineArrowRightOnRectangle, HiOutlineCube, HiOutlineHome, HiOutlinePaintBrush, HiOutlineTicket, HiOutlineUsers } from "react-icons/hi2";
 import type { IconType } from "react-icons";
 import { AppShell, Breadcrumbs } from "@/components/dash/app-shell";
-import { api } from "@/lib/vowly/client";
+import { LogoutButton } from "@/components/dash/logout-button";
 import { cn } from "@/lib/utils";
 import { initials } from "@/lib/vowly/format";
 import type { User } from "@/lib/vowly/types";
@@ -54,18 +54,8 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 export function AdminShell({ user, children }: { user: User; children: ReactNode }) {
-  const router = useRouter();
   const pathname = usePathname();
   const active = items.find((item) => isAdminActive(pathname, item.href));
-
-  async function logout() {
-    try {
-      await api.session("logout");
-    } finally {
-      router.replace("/sign-in");
-      router.refresh();
-    }
-  }
 
   return (
     <AppShell
@@ -74,6 +64,12 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
       pill="Panel Administrasi Vowly • Kelola pengguna & katalog"
       breadcrumbs={<Breadcrumbs items={[{ label: "Beranda", href: "/admin" }, { label: "Administrasi", href: "/admin" }, ...(active && active.href !== "/admin" ? [{ label: active.label }] : [{ label: "Ringkasan" }])]} />}
       renderNav={(onNavigate) => <Nav onNavigate={onNavigate} />}
+      sidebarFooter={
+        <LogoutButton className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-50">
+          <HiOutlineArrowRightOnRectangle className="size-5 shrink-0" aria-hidden />
+          Keluar
+        </LogoutButton>
+      }
       user={
         <>
           <span className="grid size-10 place-items-center rounded-full bg-blush text-xs font-semibold text-blush-foreground ring-2 ring-gold/50">{initials(user.name)}</span>
@@ -81,9 +77,9 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
             <span className="block max-w-44 truncate text-sm leading-4 font-semibold">{user.name}</span>
             <span className="block text-[11px] leading-4 text-ink-soft">Administrator</span>
           </span>
-          <button type="button" onClick={() => void logout()} className="rounded-lg p-2 text-red-700 hover:bg-red-50" aria-label="Keluar">
-            <HiOutlineArrowRightOnRectangle className="size-5" aria-hidden />
-          </button>
+          <LogoutButton className="rounded-lg p-2 text-red-700 hover:bg-red-50">
+            <HiOutlineArrowRightOnRectangle className="size-5" aria-label="Keluar" />
+          </LogoutButton>
         </>
       }
     >

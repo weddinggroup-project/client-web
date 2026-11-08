@@ -5,7 +5,7 @@ import { HiOutlineArrowDownTray, HiOutlineArrowUpTray, HiOutlineCloudArrowUp } f
 import { cn } from "@/lib/utils";
 import { useFeedback } from "@/components/dash/feedback";
 import type { FieldDef, FormValues } from "@/components/dash/form-modal";
-import { Badge, DashHeader, Panel, StatCard, btn, type Tone } from "@/components/dash/primitives";
+import { Badge, DashHeader, StatCard, btn, type Tone } from "@/components/dash/primitives";
 import { useResource } from "@/components/dash/use-resource";
 import { api, ApiError } from "@/lib/vowly/client";
 import type { DocumentKind, DocumentStatus, DocumentSummary, FileInfo, FileUrl, Vendor, VowlyDocument } from "@/lib/vowly/types";
@@ -199,12 +199,6 @@ export function DokumenView() {
           };
         }}
       />
-
-      <Panel className="mt-6">
-        <p className="text-sm text-ink-soft">
-          Diunggah pada sesi ini: <strong className="text-ink">{uploaded.length}</strong>. Format PDF, JPEG, PNG, atau WebP, maksimum 8 MB.
-        </p>
-      </Panel>
     </>
   );
 }
